@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#36613f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Willow">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<script>window.WILLOW_EMBED = true;</script>
+<title>Willow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@500;600&display=swap">
+</head>
+<body>
+<style>
+/* Layout: one-column phone app. Sticky header, scrolling content, fixed bottom tab bar, full-screen follow-along overlay.
+   Natural palette: moss, river, ochre, clay and dusk on a pale sage-stone ground (light) or deep forest (dark). Large type throughout. */
+:root{
+  --bg:#f1f3ec; --surface:#fbfcf8; --sunk:#e5e9dd; --line:#d1d8c8;
+  --ink:#1c2620; --ink-2:#47544a; --ink-3:#66726a;
+  --accent:#36613f; --accent-ink:#ffffff; --accent-soft:#dbe7d7;
+  --c-chair:#36613f; --c-balance:#2d6580; --c-taichi:#765610; --c-stretch:#954629; --c-mobility:#57568a;
+  --tip-bg:#f4ecd6; --tip-ink:#5a4208;
+  --scrim:rgba(20,28,22,.45);
+  --display:'Lexend','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --body:'Atkinson Hyperlegible','Verdana',system-ui,sans-serif;
+  --r:18px; --gut:16px;
+  font-size:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121813; --surface:#1a221c; --sunk:#243026; --line:#324035;
+    --ink:#e7ede4; --ink-2:#b2bdb3; --ink-3:#8e9a90;
+    --accent:#93c59b; --accent-ink:#0f1a12; --accent-soft:#25392b;
+    --c-chair:#93c59b; --c-balance:#8cc3de; --c-taichi:#dcbc6b; --c-stretch:#e9a083; --c-mobility:#b4b3e2;
+    --tip-bg:#2e2a1c; --tip-ink:#e8d39b;
+    --scrim:rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121813; --surface:#1a221c; --sunk:#243026; --line:#324035;
+  --ink:#e7ede4; --ink-2:#b2bdb3; --ink-3:#8e9a90;
+  --accent:#93c59b; --accent-ink:#0f1a12; --accent-soft:#25392b;
+  --c-chair:#93c59b; --c-balance:#8cc3de; --c-taichi:#dcbc6b; --c-stretch:#e9a083; --c-mobility:#b4b3e2;
+  --tip-bg:#2e2a1c; --tip-ink:#e8d39b;
+  --scrim:rgba(0,0,0,.6);
+}
+:root[data-size="large"]{font-size:21px}
+:root[data-size="largest"]{font-size:24px}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.15}
+p{margin:0}
+svg{flex:none}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* Shell */
+.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.hdr-in{max-width:560px;margin:0 auto;padding:10px var(--gut);display:flex;align-items:center;gap:12px;min-height:60px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--accent)}
+.brand svg{width:1.5rem;height:1.5rem}
+.hdr .spacer{flex:1}
+.size-btn{min-height:48px;padding:0 16px;border-radius:999px;background:var(--sunk);font-family:var(--display);font-weight:600;font-size:1rem;display:inline-flex;align-items:center;gap:6px}
+main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px calc(120px + env(safe-area-inset-bottom,0px))}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px))}
+.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;min-height:64px;border-radius:14px;color:var(--ink-2);font-size:.82rem;font-weight:700}
+.tab svg{width:28px;height:28px}
+.tab.on{color:var(--accent);background:var(--accent-soft)}
+
+/* Type + common */
+.page-h{font-size:1.75rem;margin-bottom:6px}
+.lede{color:var(--ink-2);margin-bottom:18px}
+.sec-h{font-size:1.15rem;margin:30px 0 12px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:60px;padding:12px 22px;border-radius:16px;font-family:var(--display);font-weight:600;font-size:1.1rem;background:var(--sunk);color:var(--ink);text-decoration:none;text-align:center}
+.btn svg{width:1.4rem;height:1.4rem}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.wide{width:100%}
+.btn.quiet{background:transparent;border:2px solid var(--line)}
+.btn.small{min-height:52px;font-size:1rem;padding:10px 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--sunk);color:var(--ink-2);white-space:nowrap}
+.tag.cat{color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,var(--surface))}
+.tag svg{width:1rem;height:1rem}
+.muted{color:var(--ink-2)}
+.tip{display:flex;gap:10px;background:var(--tip-bg);color:var(--tip-ink);border-radius:14px;padding:14px 16px;font-size:.95rem}
+.tip svg{width:1.3rem;height:1.3rem;margin-top:2px}
+.tip b{display:block}
+
+/* Today */
+.hello{font-size:1.9rem;margin-bottom:4px}
+.date{color:var(--ink-2);margin-bottom:18px}
+.today-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
+.today-card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--cc)}
+.eyebrow{font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.today-card h2{font-size:1.6rem}
+.prog-meta{display:flex;flex-wrap:wrap;gap:8px}
+.ex-mini{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+.ex-mini li{display:flex;gap:10px;align-items:baseline}
+.ex-mini li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cc);flex:none;transform:translateY(-2px)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--ink-3)}
+.wd i{width:100%;max-width:44px;aspect-ratio:1;border-radius:50%;background:var(--sunk);display:grid;place-items:center;color:var(--accent-ink)}
+.wd i svg{width:60%;height:60%}
+.wd.hit i{background:var(--accent)}
+.wd.now{color:var(--ink)}
+.wd.now i{box-shadow:0 0 0 2px var(--ink-2)}
+.week-note{margin-top:12px;color:var(--ink-2)}
+
+/* Program cards + list rows */
+.p-card{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-left:8px solid var(--cc);border-radius:var(--r);padding:16px 18px}
+.p-card h3{font-size:1.25rem}
+.p-card .go{display:flex;align-items:center;gap:6px;color:var(--accent);font-family:var(--display);font-weight:600}
+.p-card .go svg{width:1.2rem;height:1.2rem}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 calc(var(--gut) * -1) 6px;padding-inline:var(--gut);scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{min-height:48px;padding:0 16px;border-radius:999px;background:var(--surface);border:2px solid var(--line);font-weight:700;font-size:.95rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 4px}
+.switch{width:64px;height:38px;border-radius:999px;background:var(--line);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:4px;left:4px;width:30px;height:30px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(26px)}
+.ex-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 4px;border-bottom:1px solid var(--line);min-height:76px}
+.ex-ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,var(--surface));flex:none}
+.ex-ico svg{width:30px;height:30px}
+.ex-row .t{font-weight:700;font-size:1.05rem;line-height:1.25}
+.ex-row .s{color:var(--ink-2);font-size:.92rem}
+.ex-row .txt{flex:1;min-width:0}
+.ex-row .fav{color:var(--c-stretch)}
+.ex-row .fav svg{width:1.2rem;height:1.2rem}
+.chev{color:var(--ink-3);width:1.3rem;height:1.3rem}
+.empty{text-align:center;padding:30px 10px;color:var(--ink-2)}
+
+/* Detail + follow-along shared */
+.back{display:inline-flex;align-items:center;gap:6px;min-height:52px;font-family:var(--display);font-weight:600;color:var(--accent);margin:-6px 0 6px -4px;padding:0 6px}
+.back svg{width:1.3rem;height:1.3rem}
+.d-title{font-size:1.8rem;margin:6px 0 10px}
+.d-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.dose{font-family:var(--display);font-weight:600;font-size:1.25rem;margin-bottom:16px}
+.video{border-radius:16px;overflow:hidden;background:#000;aspect-ratio:16/9;max-width:100%;width:100%}
+.video iframe{width:100%;height:100%;border:0;display:block}
+.vid-src{font-size:.88rem;color:var(--ink-2);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.vid-src a{font-weight:700}
+.watch{display:flex;align-items:center;gap:14px;width:100%;text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:14px 16px;min-height:76px}
+.watch .play{width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.watch .play svg{width:26px;height:26px;margin-left:3px}
+.watch .t{font-family:var(--display);font-weight:600;font-size:1.1rem}
+.watch .s{font-size:.88rem;color:var(--ink-2)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps li{display:flex;gap:14px;align-items:flex-start;font-size:1.05rem}
+.steps li::before{counter-increment:s;content:counter(s);width:2rem;height:2rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--display);font-weight:600;display:grid;place-items:center;flex:none;font-size:.95rem}
+.act-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+
+/* Follow-along overlay */
+.fa{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px)}
+.fa-top{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line)}
+.fa-top-in{max-width:560px;margin:0 auto;padding:8px var(--gut);display:flex;align-items:center;gap:12px;min-height:64px}
+.fa-top .count{font-family:var(--display);font-weight:600;font-size:1.05rem;flex:1}
+.bar{height:8px;background:var(--sunk)}
+.bar>div{height:100%;background:var(--accent);transition:width .3s}
+.fa-body{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:16px calc(150px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
+.fa-foot{position:fixed;left:0;right:0;bottom:0;z-index:3;background:var(--surface);border-top:1px solid var(--line);padding:10px var(--gut) calc(12px + env(safe-area-inset-bottom,0px))}
+.fa-foot-in{max-width:528px;margin:0 auto;display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.timer{display:flex;align-items:center;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px}
+.ring{position:relative;width:120px;height:120px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .tr{fill:none;stroke:var(--sunk);stroke-width:10}
+.ring .pr{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .9s linear}
+.ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:1.9rem;font-variant-numeric:tabular-nums}
+.timer-side{display:flex;flex-direction:column;gap:10px;flex:1;min-width:0}
+.timer-side .lbl{font-weight:700;color:var(--ink-2)}
+.timer-side .done-msg{font-weight:700;color:var(--accent)}
+.stop-note{font-size:.9rem;color:var(--ink-2);text-align:center}
+.confirm{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px}
+.finish{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;padding-top:20px}
+.finish .leaf{width:96px;height:96px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.finish .leaf svg{width:56px;height:56px}
+.finish h2{font-size:2rem}
+.feel{display:grid;grid-template-columns:1fr;gap:10px;width:100%}
+.feel .btn.on{background:var(--accent);color:var(--accent-ink)}
+
+/* Sheet */
+.sheet-wrap{position:fixed;inset:0;z-index:60;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:20px var(--gut) calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h2{font-size:1.35rem}
+.opt{display:flex;align-items:center;gap:14px;min-height:64px;padding:10px 16px;border-radius:14px;border:2px solid var(--line);text-align:left;width:100%}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt .sample{font-family:var(--display);font-weight:600;width:3rem;text-align:center}
+
+/* My Week */
+.log-item{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
+.date-chip{width:58px;flex:none;border-radius:14px;background:var(--sunk);display:flex;flex-direction:column;align-items:center;padding:6px 0}
+.date-chip span{font-size:.8rem;font-weight:700;color:var(--ink-2)}
+.date-chip b{font-family:var(--display);font-size:1.5rem;line-height:1.1}
+.log-item .t{font-weight:700}
+.log-item .s{color:var(--ink-2);font-size:.92rem}
+.set-group{display:flex;flex-direction:column;gap:10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--sunk);border-radius:14px;padding:5px}
+.seg button{min-height:52px;border-radius:10px;font-weight:700}
+.seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.help p+p{margin-top:10px}
+.help ol{margin:8px 0 0;padding-left:1.3rem;display:flex;flex-direction:column;gap:6px}
+.fine{font-size:.85rem;color:var(--ink-2);margin-top:22px}
+</style>
+
+<header class="hdr"><div class="hdr-in">
+  <div class="brand" aria-label="Willow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c0 6-1 10-4 13"/><path d="M12 3c0 6 1 10 4 13"/><path d="M12 3v18"/><path d="M8 16c-1 2-1 4 0 5"/><path d="M16 16c1 2 1 4 0 5"/></svg>Willow</div>
+  <div class="spacer"></div>
+  <button class="size-btn" id="size-btn" aria-label="Text size">A<span style="font-size:1.25em">A</span></button>
+</div></header>
+<main id="main"></main>
+<nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
+<div id="overlay"></div>
+
+<script>
+(() => {
+'use strict';
+const EMBED = !!window.WILLOW_EMBED;
+
+/* ---------- Icons ---------- */
+const I = {
+  today:'<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+  programs:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  exercises:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  week:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  chair:'<path d="M7 3v9h10V3"/><path d="M5 12h14v3H5z"/><path d="M7 15v6M17 15v6"/>',
+  balance:'<circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M12 14l-2 7M12 14l4 3"/><path d="M5 10h14"/>',
+  taichi:'<circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 000 9 4.5 4.5 0 010 9"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="12" cy="16.5" r="1"/>',
+  stretch:'<path d="M4 20c4-1 6-5 7-9s3-7 9-7"/><path d="M4 20c2-4 2-8 0-12"/><path d="M20 4c-2 2-6 2-8 0"/>',
+  mobility:'<path d="M8 13V5a1.5 1.5 0 013 0v6"/><path d="M11 11V3.5a1.5 1.5 0 013 0V11"/><path d="M14 11V5a1.5 1.5 0 013 0v8"/><path d="M8 13l-1.5-2a1.5 1.5 0 00-2.4 1.8L8 19a5 5 0 004 2h1a5 5 0 005-5v-3"/>',
+  play:'<path d="M7 4l13 8-13 8z" fill="currentColor" stroke="none"/>',
+  pause:'<path d="M7 4h3v16H7zM14 4h3v16h-3z" fill="currentColor" stroke="none"/>',
+  restart:'<path d="M4 12a8 8 0 108-8 8 8 0 00-6 2.7"/><path d="M4 4v4h4"/>',
+  chev:'<path d="M9 5l7 7-7 7"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>',
+  heartF:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" fill="currentColor"/>',
+  speak:'<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/>',
+  stopS:'<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16h.01"/>',
+  leaf:'<path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19c3-4 6-7 10-9"/>',
+  check:'<path d="M5 12l5 5 9-10"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>'
+};
+const ico = (k, cls='') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[k]}</svg>`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- Data ---------- */
+const CATS = {
+  chair:{name:'Chair & strength', short:'Strength', icon:'chair'},
+  balance:{name:'Balance', short:'Balance', icon:'balance'},
+  taichi:{name:'Tai chi & qigong', short:'Tai chi', icon:'taichi'},
+  stretch:{name:'Stretching', short:'Stretch', icon:'stretch'},
+  mobility:{name:'Hands, feet & breathing', short:'Mobility', icon:'mobility'}
+};
+const POS = {seated:'Seated', 'standing-with-support':'Hold a chair', standing:'Standing'};
+
+// mode "timer": count down secs. mode "video": follow the video, timer counts up.
+const EX = [
+ {id:'seated-marching',name:'Seated Marching',category:'chair',position:'seated',level:'gentle',dose:'30–60 seconds',secs:60,mode:'timer',steps:['Sit tall near the front of a sturdy chair.','Lift your right knee a few inches, then lower it.','Lift your left knee, then lower it.','Keep marching at a steady, comfortable pace.'],tip:'Hold the chair seat if you feel unsteady. Keep breathing.',video:{id:'1m72e65YZtM',start:0,channel:'Medbridge'}},
+ {id:'seated-knee-extension',name:'Seated Leg Straightening',category:'chair',position:'seated',level:'gentle',dose:'10 slow reps, each leg',secs:90,mode:'timer',steps:['Sit back in a sturdy chair, feet flat.','Slowly straighten one knee until the leg is level.','Hold for 2 seconds, squeezing the thigh.','Lower slowly and switch legs.'],tip:"Move slowly and don't lock or snap the knee.",video:{id:'VuJZ6dqMf8M',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'sit-to-stand',name:'Sit to Stand',category:'chair',position:'seated',level:'moderate',dose:'5–10 slow reps',secs:60,mode:'timer',steps:['Scoot to the front of a sturdy chair, feet under knees.','Lean forward, nose over toes.','Push through your heels to stand up tall.','Slowly sit back down with control.'],tip:'Put the chair against a wall. Use the armrests if you need to.',video:{id:'nJEP2CE8oGM',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'overhead-arm-raise',name:'Overhead Arm Raise',category:'chair',position:'seated',level:'gentle',dose:'10 slow reps',secs:60,mode:'timer',steps:['Sit tall with feet flat. Use light weights or none.','Start with hands at shoulder height, palms forward.','Slowly push both arms straight up overhead.','Lower slowly back to shoulder height.'],tip:"Don't arch your back. Stop if your shoulder pinches.",video:{id:'VPiawRHRpmY',start:0,channel:'National Institute on Aging'}},
+ {id:'seated-heel-toe-raises',name:'Heel and Toe Raises',category:'chair',position:'seated',level:'gentle',dose:'10 reps each',secs:60,mode:'timer',steps:['Sit tall with both feet flat on the floor.','Lift your heels, keeping toes down. Lower.','Lift your toes, keeping heels down. Lower.','Repeat in a slow rocking rhythm.'],tip:"Keep the movement smooth. Don't bounce.",video:{id:'ohvR3shCV90',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'seated-torso-twist',name:'Seated Torso Twist',category:'chair',position:'seated',level:'gentle',dose:'5 slow reps, each side',secs:60,mode:'timer',steps:['Sit tall, feet flat, arms crossed over your chest.','Slowly turn your upper body to the right.','Return to center.','Turn to the left, then back to center.'],tip:'Turn only as far as is comfortable. Keep hips facing forward.',video:{id:'fBQ1nMmf3b0',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'wall-push-up',name:'Wall Push-Up',category:'chair',position:'standing',level:'moderate',dose:'10 slow reps',secs:60,mode:'timer',steps:["Stand an arm's length from a wall.",'Place hands flat on the wall at shoulder height.','Bend elbows to bring your chest toward the wall.','Push back slowly until arms are straight.'],tip:'Keep your feet planted. Stand closer to make it easier.',video:{id:'751E9kAdkwg',start:0,channel:'National Institute on Aging'}},
+ {id:'seated-bicep-curl',name:'Seated Arm Curl',category:'chair',position:'seated',level:'gentle',dose:'10 slow reps',secs:60,mode:'timer',steps:['Sit tall holding light weights or soup cans.','Keep elbows close to your sides, palms up.','Bend elbows to bring weights toward shoulders.','Lower slowly to the start.'],tip:"Start very light. Don't swing your arms.",video:{id:'8I640AY2j-U',start:0,channel:'Rehab My Patient'}},
+ {id:'heel-to-toe-walk',name:'Heel-to-Toe Walk',category:'balance',position:'standing-with-support',level:'moderate',dose:'20 steps',secs:60,mode:'timer',steps:['Stand beside a counter or wall you can touch.',"Place one heel right in front of the other foot's toes.",'Step forward the same way with the other foot.','Look ahead, not at your feet.'],tip:'Keep one hand on the counter or have a helper nearby.',video:{id:'z_GKdFf3qv4',start:0,channel:'National Institute on Aging'}},
+ {id:'stand-on-one-foot',name:'Stand on One Foot',category:'balance',position:'standing-with-support',level:'gentle',dose:'Hold 10 seconds, each side',secs:60,mode:'timer',steps:['Stand behind a sturdy chair, holding the back.','Shift your weight onto one foot.','Lift the other foot slightly off the floor.','Hold, then switch feet.'],tip:'Keep holding the chair. Let go only when you feel very steady.',video:{id:'QT5d4tTXW6U',start:0,channel:'National Institute on Aging'}},
+ {id:'side-leg-raise',name:'Side Leg Raise',category:'balance',position:'standing-with-support',level:'gentle',dose:'10 reps, each leg',secs:90,mode:'timer',steps:['Stand behind a chair, holding the back.','Keep your back straight and toes facing forward.','Slowly lift one leg out to the side.','Lower slowly. Switch legs after your reps.'],tip:"Don't lean to the side. Small lifts are fine.",video:{id:'045sWtKt5D4',start:0,channel:'National Institute on Aging'}},
+ {id:'back-leg-raise',name:'Back Leg Raise',category:'balance',position:'standing-with-support',level:'gentle',dose:'10 reps, each leg',secs:90,mode:'timer',steps:['Stand behind a chair, holding the back.','Keep your knee straight.','Slowly lift one leg straight back.','Lower slowly. Switch legs after your reps.'],tip:"Don't lean forward or arch your back.",video:{id:'B54sRn3f8S0',start:0,channel:'National Institute on Aging'}},
+ {id:'heel-raises-at-counter',name:'Toe Stand',category:'balance',position:'standing-with-support',level:'gentle',dose:'10 slow reps',secs:60,mode:'timer',steps:['Stand facing a counter or chair, holding on.','Rise up slowly onto your toes.','Hold for a moment.','Lower your heels slowly to the floor.'],tip:'Hold on with both hands at first.',video:{id:'04zZLGcrN5Y',start:0,channel:'National Institute on Aging'}},
+ {id:'side-weight-shifts',name:'Side-to-Side Sway',category:'balance',position:'standing-with-support',level:'gentle',dose:'10 shifts each way',secs:60,mode:'timer',steps:['Stand with feet hip-width apart, holding a counter.','Slowly shift your weight onto your right foot.','Pause, then shift to your left foot.','Keep your body upright as you sway.'],tip:'Move slowly. Your feet stay on the floor.',video:{id:'ZXL9qLfGlSM',start:0,channel:'Tom Morgan Physio Solutions'}},
+ {id:'seated-tai-chi',name:'Seated Tai Chi',category:'taichi',position:'seated',level:'gentle',dose:'About 10 minutes',secs:600,mode:'video',steps:['Sit tall near the front of a sturdy chair.','Follow the slow arm movements in the video.','Breathe in as arms rise, out as they lower.','Keep your shoulders relaxed.'],tip:'A good choice on low-energy days.',video:{id:'G2amZq5HvqA',start:0,channel:'Freshfield Fitness Tai Chi Active'}},
+ {id:'seated-qigong',name:'Seated Qigong',category:'taichi',position:'seated',level:'gentle',dose:'About 10 minutes',secs:600,mode:'video',steps:['Sit tall with feet flat.','Follow the gentle flowing movements.','Breathe slowly through your nose.','Rest your hands on your lap to finish.'],tip:'Slow is the goal. Rest anytime.',video:{id:'Mj7t1cehLYg',start:0,channel:'Itstimefitness'}},
+ {id:'tai-chi-for-arthritis',name:'Tai Chi for Arthritis',category:'taichi',position:'standing',level:'gentle',dose:'About 10 minutes',secs:600,mode:'video',steps:['Stand tall with feet apart and knees soft.','Follow the warm-up and moves slowly.','Keep movements small and smooth.','Sit and rest if your joints feel sore.'],tip:'Made for sore joints. Never push into pain.',video:{id:'tAOuEpa01j4',start:0,channel:'Dr Paul Lam, Tai Chi for Health Institute'}},
+ {id:'tai-chi-for-beginners',name:'Tai Chi for Beginners',category:'taichi',position:'standing',level:'gentle',dose:'About 10 minutes',secs:600,mode:'video',steps:['Stand with feet shoulder-width apart, knees soft.','Follow along slowly with the instructor.','Breathe in and out with each movement.','Rest in a chair whenever you need to.'],tip:'Keep a chair nearby and move only in a comfortable range.',video:{id:'hIOHGrYCEJ4',start:0,channel:'Dr Paul Lam, Tai Chi for Health Institute'}},
+ {id:'tai-chi-arthritis-class',name:'Tai Chi Class with Dr. Lam',category:'taichi',position:'standing',level:'gentle',dose:'15 minutes or more',secs:900,mode:'video',steps:['Find a clear space with a chair nearby.',"Follow Dr. Lam's slow movements.",'Breathe gently and stay relaxed.','Stop when tired. You can finish another day.'],tip:'Do just part of the class at first.',video:{id:'yoN6P9D4yAY',start:0,channel:'NYC Department for the Aging'}},
+ {id:'tai-chi-walking',name:'Tai Chi Walking',category:'taichi',position:'standing-with-support',level:'moderate',dose:'About 5 minutes',secs:300,mode:'video',steps:['Stand beside a counter with knees soft.','Shift your weight to one leg.','Place the other heel forward gently, then roll onto it.','Move slowly, one step at a time.'],tip:'Practice next to a counter or wall for support.',video:{id:'7KiS1icfK6E',start:0,channel:'Dr Paul Lam, Tai Chi for Health Institute'}},
+ {id:'neck-side-stretch',name:'Neck Side Stretch',category:'stretch',position:'seated',level:'gentle',dose:'Hold 15–20 seconds, each side',secs:60,mode:'timer',steps:['Sit tall with shoulders relaxed.','Tilt your ear toward your shoulder.','Hold where you feel a gentle stretch.','Return to center and switch sides.'],tip:"Don't pull hard or roll your head in circles.",video:{id:'UUXUVFQS5u0',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'nia-shoulder-arm-stretch',name:'Shoulder and Arm Stretch',category:'stretch',position:'seated',level:'gentle',dose:'Hold 10–30 seconds, each side',secs:60,mode:'timer',steps:['Hold a towel in one hand over your shoulder.','Reach behind your back with the other hand to grab it.','Gently pull the towel to stretch your shoulder.','Switch hands and repeat.'],tip:'Stretch to mild tension only, never pain.',video:{id:'CW0h60-PS4Y',start:0,channel:'National Institute on Aging'}},
+ {id:'chest-stretch',name:'Chest Stretch',category:'stretch',position:'standing',level:'gentle',dose:'Hold 20 seconds, 2–3 times',secs:60,mode:'timer',steps:['Stand or sit tall with arms at your sides.','Clasp hands behind you or open arms wide.','Gently squeeze your shoulder blades together.','Lift your chest and hold.'],tip:'Keep your chin level and breathe normally.',video:{id:'NePr1XKRTLU',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'seated-hamstring-stretch',name:'Back of Leg Stretch',category:'stretch',position:'seated',level:'gentle',dose:'Hold 20 seconds, each leg',secs:60,mode:'timer',steps:['Sit near the front of a chair.','Straighten one leg out, heel on the floor.','Sit tall and lean forward slightly from the hips.','Hold, then switch legs.'],tip:"Keep your back straight. Don't bounce.",video:{id:'P3rK-zhrUwg',start:0,channel:'OrthoIndy'}},
+ {id:'calf-stretch-wall',name:'Calf Stretch at the Wall',category:'stretch',position:'standing-with-support',level:'gentle',dose:'Hold 20–30 seconds, each leg',secs:60,mode:'timer',steps:['Face a wall with both hands on it.','Step one foot back, heel down, knee straight.','Bend the front knee and lean toward the wall.','Hold, then switch legs.'],tip:'Keep the back heel on the floor and both hands on the wall.',video:{id:'i1eJqJ3v3lQ',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'nia-ankle-stretch',name:'Ankle Stretch',category:'stretch',position:'seated',level:'gentle',dose:'Hold 10–20 seconds, 3 times',secs:60,mode:'timer',steps:['Sit near the front of a chair, legs out in front.','Point your toes away from you and hold.','Pull your toes back toward you and hold.','Repeat slowly.'],tip:'Move gently, especially if your ankles are stiff.',video:{id:'87BeiyTFZyU',start:0,channel:'National Institute on Aging'}},
+ {id:'hand-grip',name:'Hand Squeeze',category:'mobility',position:'seated',level:'gentle',dose:'10 squeezes, each hand',secs:60,mode:'timer',steps:['Hold a soft ball or rolled sock in one hand.','Squeeze slowly, as hard as is comfortable.','Hold for 3 to 5 seconds.','Relax slowly. Switch hands after your reps.'],tip:'Ease off if your fingers or wrist ache.',video:{id:'kgqIdCwVivE',start:0,channel:'National Institute on Aging'}},
+ {id:'hand-finger-stretches',name:'Hand and Finger Stretches',category:'mobility',position:'seated',level:'gentle',dose:'2–3 minutes',secs:120,mode:'timer',steps:['Rest your forearm on a table.','Make a gentle fist, then spread your fingers wide.','Touch your thumb to each fingertip.','Repeat slowly with the other hand.'],tip:"Warm your hands in water first if they're stiff.",video:{id:'tRnqF-AFFdw',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'ankle-circles',name:'Ankle Circles',category:'mobility',position:'seated',level:'gentle',dose:'10 circles each way, each foot',secs:60,mode:'timer',steps:['Sit tall and lift one foot slightly.','Slowly draw circles with your toes.','Switch direction.','Switch feet.'],tip:'Rest your leg on a stool if lifting it is tiring.',video:{id:'mzTQGYGI0Ng',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
+ {id:'seated-hip-mobility',name:'Seated Hip Exercises',category:'mobility',position:'seated',level:'gentle',dose:'5–8 minutes',secs:480,mode:'video',steps:['Sit tall near the front of a sturdy chair.','Follow along with gentle knee lifts and leg movements.','Move only through a comfortable range.','Rest between exercises.'],tip:'Hold the chair seat for balance.',video:{id:'ROwj2dNcL6c',start:0,channel:'More Life Health Seniors'}},
+ {id:'deep-breathing',name:'Deep Belly Breathing',category:'mobility',position:'seated',level:'gentle',dose:'1–2 minutes',secs:90,mode:'timer',steps:['Sit comfortably with one hand on your belly.','Breathe in slowly through your nose. Let your belly rise.','Breathe out slowly through pursed lips.','Keep your shoulders relaxed.'],tip:'If you feel dizzy, go back to normal breathing.',video:{id:'W9Gx6sT-W1A',start:0,channel:'Hinge Health'}},
+ {id:'getting-up-from-floor',name:'Getting Up From the Floor',category:'mobility',position:'standing-with-support',level:'moderate',dose:'Practice once or twice',secs:300,mode:'video',steps:['Roll onto your side, then up onto hands and knees.','Crawl to a sturdy chair.','Put your hands on the seat and bring one foot forward.','Push up slowly, then turn and sit.'],tip:'Practice only with a helper nearby. Rest before getting up.',video:{id:'wMGANlT9vlM',start:0,channel:'Ask Doctor Jo (physical therapist)'}}
+];
+const EXM = Object.fromEntries(EX.map(e => [e.id, e]));
+
+const PROGRAMS = [
+ {id:'morning-chair',name:'Morning Chair Routine',cat:'chair',blurb:'Wake up the whole body without leaving your seat.',ex:['seated-marching','seated-heel-toe-raises','overhead-arm-raise','seated-knee-extension','seated-torso-twist','neck-side-stretch','deep-breathing']},
+ {id:'steady',name:'Steady on Your Feet',cat:'balance',blurb:'Balance practice with a chair to hold. Helps prevent falls.',ex:['side-weight-shifts','heel-raises-at-counter','stand-on-one-foot','side-leg-raise','back-leg-raise','heel-to-toe-walk']},
+ {id:'taichi-seated',name:'Tai Chi, Sitting Down',cat:'taichi',blurb:'Slow, flowing tai chi from your chair, then quiet breathing.',ex:['seated-tai-chi','deep-breathing']},
+ {id:'taichi-first',name:'Tai Chi First Steps',cat:'taichi',blurb:'A gentle standing lesson made for sore joints.',ex:['tai-chi-for-arthritis','tai-chi-walking']},
+ {id:'stronger',name:'Stronger Legs & Arms',cat:'chair',blurb:'Builds the strength for stairs, groceries and getting up.',ex:['sit-to-stand','wall-push-up','seated-bicep-curl','overhead-arm-raise','heel-raises-at-counter','seated-knee-extension']},
+ {id:'unwind',name:'Stretch & Unwind',cat:'stretch',blurb:'Loosen up stiff spots, top to bottom.',ex:['neck-side-stretch','nia-shoulder-arm-stretch','chest-stretch','seated-hamstring-stretch','calf-stretch-wall','nia-ankle-stretch','deep-breathing']},
+ {id:'hands-feet',name:'Hands & Feet',cat:'mobility',blurb:'For stiff fingers and ankles. Easy to do while watching TV.',ex:['hand-grip','hand-finger-stretches','ankle-circles','nia-ankle-stretch','seated-heel-toe-raises']}
+];
+const PM = Object.fromEntries(PROGRAMS.map(p => [p.id, p]));
+// Sunday..Saturday
+const WEEK_PLAN = ['taichi-seated','morning-chair','steady','taichi-first','stronger','unwind','hands-feet'];
+
+/* ---------- Storage ---------- */
+const KEY = 'willow.v1';
+const DEF = {favs:[], log:[], size:'normal', theme:'auto', welcomed:false, seatedOnly:false};
+let S = (() => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { return Object.assign({}, DEF); } })();
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+
+function applyPrefs(){
+  const r = document.documentElement;
+  if (S.size === 'normal') r.removeAttribute('data-size'); else r.setAttribute('data-size', S.size);
+  if (S.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', S.theme);
+}
+
+/* ---------- Helpers ---------- */
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DOWF = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const progMins = p => Math.max(5, Math.round(p.ex.reduce((a, id) => a + EXM[id].secs + 20, 0) / 60));
+const progLevel = p => p.ex.some(id => EXM[id].level === 'moderate') ? 'Some standing work' : 'Gentle';
+const progSeated = p => p.ex.every(id => EXM[id].position === 'seated');
+const ytWatch = v => `https://www.youtube.com/watch?v=${v.id}${v.start ? '&t=' + v.start + 's' : ''}`;
+const ytEmbed = v => `https://www.youtube-nocookie.com/embed/${v.id}?rel=0&playsinline=1&modestbranding=1${v.start ? '&start=' + v.start : ''}`;
+const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+const catVar = c => `--cc:var(--c-${c})`;
+
+function weekDays(){
+  const now = new Date(); const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+  return [...Array(7)].map((_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+}
+const daysDone = () => new Set(S.log.map(l => l.date));
+
+/* ---------- Speech ---------- */
+const canSpeak = 'speechSynthesis' in window;
+let speaking = null;
+function speak(ex, btn){
+  if (!canSpeak) return;
+  try {
+    if (speaking === ex.id) { speechSynthesis.cancel(); speaking = null; refreshSpeakBtns(); return; }
+    speechSynthesis.cancel();
+    const text = `${ex.name}. ${ex.dose}. ${ex.steps.map((s, i) => `Step ${i+1}. ${s}`).join(' ')} Safety tip. ${ex.tip}`;
+    const u = new SpeechSynthesisUtterance(text); u.rate = .88;
+    u.onend = u.onerror = () => { speaking = null; refreshSpeakBtns(); };
+    speaking = ex.id; speechSynthesis.speak(u); refreshSpeakBtns();
+  } catch { speaking = null; }
+}
+function refreshSpeakBtns(){
+  document.querySelectorAll('[data-speak]').forEach(b => {
+    const on = speaking === b.dataset.speak;
+    b.innerHTML = `${ico(on ? 'stopS' : 'speak')}${on ? 'Stop reading' : 'Read aloud'}`;
+  });
+}
+
+/* ---------- Chime + wake lock ---------- */
+let actx = null;
+function chime(){
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * .18;
+      o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + .7);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + .75);
+    });
+  } catch {}
+  try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch {}
+}
+let wake = null;
+async function keepAwake(on){
+  try {
+    if (on && 'wakeLock' in navigator) { wake = await navigator.wakeLock.request('screen'); }
+    else if (!on && wake) { await wake.release(); wake = null; }
+  } catch { wake = null; }
+}
+
+/* ---------- Router ---------- */
+let tab = 'today';
+let view = null; // {type:'program'|'exercise', id}
+let exFilter = 'all';
+const main = document.getElementById('main');
+const tabsEl = document.getElementById('tabs');
+const overlay = document.getElementById('overlay');
+const TABS = [['today','Today','today'],['programs','Programs','programs'],['exercises','Exercises','exercises'],['week','My Week','week']];
+
+function renderTabs(){
+  tabsEl.innerHTML = TABS.map(([k, l, ic]) => `<button class="tab${tab === k ? ' on' : ''}" data-tab="${k}" aria-current="${tab === k ? 'page' : 'false'}">${ico(ic)}${l}</button>`).join('');
+}
+function go(t, v=null){
+  tab = t; view = v;
+  if (canSpeak && speaking) { try { speechSynthesis.cancel(); } catch {} speaking = null; }
+  render(); window.scrollTo(0, 0);
+}
+function render(){
+  renderTabs();
+  if (view && view.type === 'program') main.innerHTML = programView(PM[view.id]);
+  else if (view && view.type === 'exercise') main.innerHTML = exerciseView(EXM[view.id]);
+  else main.innerHTML = ({today:todayView, programs:programsView, exercises:exercisesView, week:weekView})[tab]();
+}
+
+/* ---------- Views ---------- */
+function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
+
+function welcomeCard(){
+  if (S.welcomed) return '';
+  return `<div class="card stack" style="margin-bottom:18px">
+    <h2 style="font-size:1.3rem">Welcome to Willow</h2>
+    <p>Each day there's a short routine ready for you. Tap <b>Start</b> and the app walks you through one exercise at a time, with a video and a timer.</p>
+    <div class="tip">${ico('shield')}<div><b>Before you begin</b>Check with your doctor before starting a new exercise routine. Stop if you feel pain, dizziness, chest pain or shortness of breath.</div></div>
+    <button class="btn primary wide" data-act="welcomed">Got it</button>
+  </div>`;
+}
+
+function weekStrip(){
+  const done = daysDone(), today = ymd(new Date());
+  const days = weekDays();
+  const n = days.filter(d => done.has(ymd(d))).length;
+  const note = n === 0 ? 'A fresh week. Any little bit counts.' : n === 1 ? 'You moved on 1 day this week. Nice start.' : `You moved on ${n} days this week. Lovely.`;
+  return `<div class="week" role="list" aria-label="This week">${days.map(d => {
+    const k = ymd(d), hit = done.has(k);
+    return `<div class="wd${hit ? ' hit' : ''}${k === today ? ' now' : ''}" role="listitem" aria-label="${DOWF[d.getDay()]}${hit ? ', exercised' : ''}">${DOW[d.getDay()]}<i>${hit ? ico('leaf') : ''}</i></div>`;
+  }).join('')}</div><p class="week-note">${note}</p>`;
+}
+
+function todayView(){
+  const d = new Date();
+  const p = PM[WEEK_PLAN[d.getDay()]];
+  const doneToday = S.log.some(l => l.date === ymd(d));
+  const others = PROGRAMS.filter(x => x.id !== p.id).slice(0, 3);
+  return `${welcomeCard()}
+  <h1 class="hello">${greeting()}</h1>
+  <p class="date">${DOWF[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}</p>
+  <section class="today-card" style="${catVar(p.cat)}">
+    <span class="eyebrow">${doneToday ? 'Done for today. Want more?' : "Today's routine"}</span>
+    <h2>${esc(p.name)}</h2>
+    <div class="prog-meta"><span class="tag">About ${progMins(p)} min</span><span class="tag">${progSeated(p) ? 'All seated' : progLevel(p)}</span></div>
+    <ul class="ex-mini">${p.ex.map(id => `<li>${esc(EXM[id].name)}</li>`).join('')}</ul>
+    <button class="btn primary wide" data-start="${p.id}">${ico('play')}Start</button>
+    <button class="btn quiet wide small" data-open-program="${p.id}">See the exercises first</button>
+  </section>
+  <h2 class="sec-h">This week</h2>
+  ${weekStrip()}
+  <h2 class="sec-h">Or try something else</h2>
+  <div class="stack">${others.map(progCard).join('')}</div>`;
+}
+
+function progCard(p){
+  return `<button class="p-card" style="${catVar(p.cat)}" data-open-program="${p.id}">
+    <h3>${esc(p.name)}</h3>
+    <span class="muted">${esc(p.blurb)}</span>
+    <div class="prog-meta"><span class="tag">${progMins(p)} min</span><span class="tag">${p.ex.length} exercises</span>${progSeated(p) ? '<span class="tag">All seated</span>' : ''}</div>
+    <span class="go">Open ${ico('chev')}</span>
+  </button>`;
+}
+
+function myRoutine(){
+  const favs = S.favs.filter(id => EXM[id]);
+  if (!favs.length) return null;
+  return {id:'mine', name:'My Favorites', cat:'stretch', blurb:'The exercises you saved with the heart button.', ex:favs};
+}
+
+function programsView(){
+  const mine = myRoutine();
+  return `<h1 class="page-h">Programs</h1>
+  <p class="lede">Short routines that walk you through each exercise.</p>
+  <div class="stack">${PROGRAMS.map(progCard).join('')}</div>
+  <h2 class="sec-h">My Favorites</h2>
+  ${mine ? progCard(mine) : `<div class="card"><p class="muted">Tap the heart on any exercise to save it here. Your favorites become your own routine.</p></div>`}`;
+}
+
+function getProgram(id){ return id === 'mine' ? myRoutine() : PM[id]; }
+
+function programView(p){
+  if (!p) return programsView();
+  return `<button class="back" data-back>${ico('back')}Back</button>
+  <h1 class="d-title">${esc(p.name)}</h1>
+  <p class="lede" style="margin-bottom:12px">${esc(p.blurb)}</p>
+  <div class="d-tags"><span class="tag">About ${progMins(p)} min</span><span class="tag">${progSeated(p) ? 'All seated' : progLevel(p)}</span></div>
+  <button class="btn primary wide" data-start="${p.id}">${ico('play')}Start</button>
+  <h2 class="sec-h">The exercises</h2>
+  <div>${p.ex.map(id => exRow(EXM[id])).join('')}</div>`;
+}
+
+function exRow(e){
+  const fav = S.favs.includes(e.id);
+  return `<button class="ex-row" style="${catVar(e.category)}" data-open-ex="${e.id}">
+    <span class="ex-ico">${ico(CATS[e.category].icon)}</span>
+    <span class="txt"><span class="t">${esc(e.name)}</span><br><span class="s">${POS[e.position]} · ${esc(e.dose)}</span></span>
+    ${fav ? `<span class="fav" aria-label="Favorite">${ico('heartF')}</span>` : ''}
+    ${ico('chev', 'chev')}
+  </button>`;
+}
+
+function exercisesView(){
+  let list = EX.filter(e => exFilter === 'all' || (exFilter === 'fav' ? S.favs.includes(e.id) : e.category === exFilter));
+  if (S.seatedOnly) list = list.filter(e => e.position === 'seated');
+  const chips = [['all','All'], ...Object.entries(CATS).map(([k, c]) => [k, c.short]), ['fav','Favorites']];
+  return `<h1 class="page-h">Exercises</h1>
+  <p class="lede">${EX.length} exercises, each with a video from a trusted source.</p>
+  <div class="chips" role="tablist" aria-label="Type of exercise">${chips.map(([k, l]) => `<button class="chip${exFilter === k ? ' on' : ''}" role="tab" aria-selected="${exFilter === k}" data-filter="${k}">${l}</button>`).join('')}</div>
+  <div class="toggle-row"><span id="seated-lbl" style="font-weight:700">Only show seated</span><button class="switch" id="seated-switch" role="switch" aria-labelledby="seated-lbl" aria-checked="${S.seatedOnly}"></button></div>
+  <div>${list.length ? list.map(exRow).join('') : `<div class="empty">${exFilter === 'fav' ? 'No favorites yet. Tap the heart on any exercise to save it.' : 'Nothing here with that filter.'}</div>`}</div>`;
+}
+
+function videoBlock(e){
+  const v = e.video;
+  if (EMBED) {
+    return `<div class="video"><iframe src="${ytEmbed(v)}" title="Video: ${esc(e.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <p class="vid-src">Video by ${esc(v.channel)}<a href="${ytWatch(v)}" target="_blank" rel="noopener">Open in YouTube</a></p>`;
+  }
+  return `<a class="watch" href="${ytWatch(v)}" target="_blank" rel="noopener">
+    <span class="play">${ico('play')}</span>
+    <span style="flex:1;min-width:0"><span class="t">Watch how</span><br><span class="s">Video by ${esc(v.channel)}. Opens YouTube.</span></span>
+    ${ico('ext', 'chev')}
+  </a>`;
+}
+
+function exerciseView(e){
+  if (!e) return exercisesView();
+  const fav = S.favs.includes(e.id);
+  return `<button class="back" data-back>${ico('back')}Back</button>
+  <h1 class="d-title">${esc(e.name)}</h1>
+  <div class="d-tags"><span class="tag cat" style="${catVar(e.category)}">${ico(CATS[e.category].icon)}${CATS[e.category].name}</span><span class="tag">${POS[e.position]}</span>${e.level === 'moderate' ? '<span class="tag">A bit harder</span>' : ''}</div>
+  <p class="dose">${esc(e.dose)}</p>
+  <div class="stack" style="gap:16px">
+    <div>${videoBlock(e)}</div>
+    <ol class="steps">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+    <div class="tip">${ico('shield')}<div><b>Safety tip</b>${esc(e.tip)}</div></div>
+  </div>
+  <div class="act-row">
+    ${canSpeak ? `<button class="btn small" data-speak="${e.id}">${ico(speaking === e.id ? 'stopS' : 'speak')}${speaking === e.id ? 'Stop reading' : 'Read aloud'}</button>` : ''}
+    <button class="btn small" data-fav="${e.id}" aria-pressed="${fav}">${ico(fav ? 'heartF' : 'heart')}${fav ? 'Saved' : 'Save'}</button>
+  </div>
+  <button class="btn primary wide" style="margin-top:12px" data-start-ex="${e.id}">${ico('play')}Do this one now</button>`;
+}
+
+function weekView(){
+  const recent = [...S.log].reverse().slice(0, 12);
+  const feelTxt = {easy:'Felt easy', right:'Felt just right', hard:'Felt too hard'};
+  return `<h1 class="page-h">My Week</h1>
+  <p class="lede">Every bit of movement counts.</p>
+  <div class="card">${weekStrip()}</div>
+  <h2 class="sec-h">Recent</h2>
+  ${recent.length ? recent.map(l => { const d = new Date(l.date + 'T12:00'); return `<div class="log-item"><div class="date-chip"><span>${DOW[d.getDay()]}</span><b>${d.getDate()}</b></div><div><div class="t">${esc(l.name)}</div><div class="s">${l.count} exercise${l.count === 1 ? '' : 's'} · ${l.mins} min${l.feel ? ' · ' + feelTxt[l.feel] : ''}</div></div></div>`; }).join('') : `<div class="card"><p class="muted">Finished routines show up here.</p></div>`}
+
+  <h2 class="sec-h">Settings</h2>
+  <div class="card set-group">
+    <span style="font-weight:700">Text size</span>
+    <div class="seg" role="group" aria-label="Text size">${[['normal','Normal'],['large','Large'],['largest','Largest']].map(([k, l]) => `<button class="${S.size === k ? 'on' : ''}" data-size="${k}" aria-pressed="${S.size === k}">${l}</button>`).join('')}</div>
+    <span style="font-weight:700;margin-top:8px">Colors</span>
+    <div class="seg" role="group" aria-label="Colors">${[['auto','Automatic'],['light','Light'],['dark','Dark']].map(([k, l]) => `<button class="${S.theme === k ? 'on' : ''}" data-theme-set="${k}" aria-pressed="${S.theme === k}">${l}</button>`).join('')}</div>
+  </div>
+
+  <h2 class="sec-h">Help</h2>
+  <div class="card help">
+    <p><b>Doing a routine.</b> Tap <b>Start</b>. Willow shows one exercise at a time with a video, the steps and a timer. Tap the big green button to start the timer, and <b>Next</b> when you're ready to move on.</p>
+    <p><b>Too hard or too easy?</b> Do fewer reps, hold for less time, or stay seated. Use <b>Only show seated</b> on the Exercises page to see chair-only moves.</p>
+    <p><b>Put Willow on your home screen.</b></p>
+    <ol><li>Open Willow's link in Safari (iPhone) or Chrome (Android).</li><li>Tap the Share button, or the ⋮ menu on Android.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>
+  </div>
+  <div class="tip" style="margin-top:16px">${ico('shield')}<div><b>Stay safe</b>Check with your doctor before starting a new exercise routine. Stop and rest if you feel pain, dizziness, chest pain or shortness of breath.</div></div>
+  <p class="fine">Videos belong to their creators and play from YouTube. Willow keeps your history on this phone only.</p>`;
+}
+
+/* ---------- Text size sheet ---------- */
+function sizeSheet(){
+  overlay.innerHTML = `<div class="sheet-wrap" data-close-sheet><div class="sheet" role="dialog" aria-modal="true" aria-label="Text size">
+    <h2>Text size</h2>
+    ${[['normal','Normal','1rem'],['large','Large','1.25rem'],['largest','Largest','1.5rem']].map(([k, l, fs]) => `<button class="opt${S.size === k ? ' on' : ''}" data-size="${k}"><span class="sample" style="font-size:${fs}">Aa</span><span style="font-weight:700">${l}</span></button>`).join('')}
+    <button class="btn primary wide" data-close-sheet>Done</button>
+  </div></div>`;
+}
+
+/* ---------- Follow-along ---------- */
+let F = null; // {prog, i, left, total, running, start, done:[], confirm, finished, feel}
+let tick = null;
+
+function startSession(prog){
+  F = {prog, i:0, confirm:false, finished:false, feel:null, began:Date.now()};
+  loadStep(); keepAwake(true); renderFA();
+}
+function loadStep(){
+  const e = EXM[F.prog.ex[F.i]];
+  F.total = e.secs; F.left = e.mode === 'timer' ? e.secs : 0; F.running = false; F.timeUp = false;
+  clearInterval(tick); tick = null;
+}
+function toggleTimer(){
+  const e = EXM[F.prog.ex[F.i]];
+  if (F.running) { F.running = false; clearInterval(tick); tick = null; updateTimer(); return; }
+  if (e.mode === 'timer' && F.left <= 0) F.left = F.total;
+  F.timeUp = false; F.running = true;
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume && actx.resume(); } catch {}
+  tick = setInterval(() => {
+    if (e.mode === 'timer') {
+      F.left -= 1;
+      if (F.left <= 0) { F.left = 0; F.running = false; F.timeUp = true; clearInterval(tick); tick = null; chime(); }
+    } else F.left += 1;
+    updateTimer();
+  }, 1000);
+  updateTimer();
+}
+function resetTimer(){ loadStep(); updateTimer(); }
+
+function timerHTML(e){
+  const C = 2 * Math.PI * 52;
+  const frac = e.mode === 'timer' ? F.left / F.total : Math.min(1, F.left / F.total);
+  const off = C * (1 - frac);
+  return `<div class="ring"><svg viewBox="0 0 120 120"><circle class="tr" cx="60" cy="60" r="52"/><circle class="pr" id="ring-pr" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg><div class="num" id="t-num" aria-live="off">${fmt(F.left)}</div></div>
+  <div class="timer-side">
+    <span class="${F.timeUp ? 'done-msg' : 'lbl'}" id="t-lbl" aria-live="polite">${F.timeUp ? 'Time! Tap Next when ready.' : e.mode === 'timer' ? (F.running ? 'Keep going…' : 'Timer') : (F.running ? 'Follow the video' : 'Time spent')}</span>
+    <button class="btn ${F.running ? '' : 'primary'} small" id="t-go" data-timer>${ico(F.running ? 'pause' : 'play')}${F.running ? 'Pause' : (F.left > 0 && F.left < F.total && e.mode === 'timer') || (e.mode === 'video' && F.left > 0) ? 'Resume' : 'Start timer'}</button>
+    ${(F.left !== (e.mode === 'timer' ? F.total : 0)) ? `<button class="btn quiet small" data-reset>${ico('restart')}Restart</button>` : ''}
+  </div>`;
+}
+function updateTimer(){
+  const e = EXM[F.prog.ex[F.i]];
+  const el = document.getElementById('timer');
+  if (el) el.innerHTML = timerHTML(e);
+}
+
+function renderFA(){
+  if (!F) { overlay.innerHTML = ''; document.body.style.overflow = ''; return; }
+  document.body.style.overflow = 'hidden';
+  const n = F.prog.ex.length;
+  if (F.finished) {
+    overlay.innerHTML = `<div class="fa"><div class="fa-body" style="padding-bottom:40px">
+      <div class="finish">
+        <div class="leaf">${ico('leaf')}</div>
+        <h2>Nice work today</h2>
+        <p class="muted">You finished ${esc(F.prog.name)}.</p>
+        <p style="font-weight:700;margin-top:10px">How did that feel?</p>
+        <div class="feel">${[['easy','Easy'],['right','Just right'],['hard','Too hard']].map(([k, l]) => `<button class="btn${F.feel === k ? ' on' : ''}" data-feel="${k}" aria-pressed="${F.feel === k}">${l}</button>`).join('')}</div>
+        ${F.feel === 'hard' ? `<div class="tip" style="text-align:left">${ico('shield')}<div><b>Next time</b>Try fewer reps, shorter holds, or the seated version. Rest as long as you need between exercises.</div></div>` : ''}
+        ${F.feel === 'easy' ? `<p class="muted">Next time you could add a few more reps, or try another routine afterward.</p>` : ''}
+        <button class="btn primary wide" data-close-fa>Done</button>
+      </div></div></div>`;
+    return;
+  }
+  const e = EXM[F.prog.ex[F.i]];
+  const last = F.i === n - 1;
+  overlay.innerHTML = `<div class="fa" role="dialog" aria-modal="true" aria-label="${esc(F.prog.name)}">
+    <div class="fa-top"><div class="fa-top-in">
+      <span class="count">${F.i + 1} of ${n}</span>
+      <button class="btn quiet small" data-end>${ico('close')}End</button>
+    </div><div class="bar"><div style="width:${(F.i / n) * 100}%"></div></div></div>
+    <div class="fa-body" style="${catVar(e.category)}">
+      ${F.confirm ? `<div class="confirm"><b style="font-size:1.1rem">End this routine?</b><span class="muted">What you've done so far still counts.</span><button class="btn primary" data-confirm-end>Yes, end and save</button><button class="btn" data-keep>Keep going</button></div>` : ''}
+      <div>
+        <span class="tag cat">${ico(CATS[e.category].icon)}${POS[e.position]}</span>
+        <h1 class="d-title" style="margin-bottom:4px">${esc(e.name)}</h1>
+        <p class="dose" style="margin:0">${esc(e.dose)}</p>
+      </div>
+      <div>${videoBlock(e)}</div>
+      <div class="timer" id="timer">${timerHTML(e)}</div>
+      <ol class="steps">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <div class="tip">${ico('shield')}<div><b>Safety tip</b>${esc(e.tip)}</div></div>
+      ${canSpeak ? `<button class="btn small" data-speak="${e.id}">${ico(speaking === e.id ? 'stopS' : 'speak')}${speaking === e.id ? 'Stop reading' : 'Read aloud'}</button>` : ''}
+      <p class="stop-note">Stop and rest if anything hurts or you feel dizzy.</p>
+    </div>
+    <div class="fa-foot"><div class="fa-foot-in">
+      <button class="btn" data-prev ${F.i === 0 ? 'disabled style="opacity:.4"' : ''}>${ico('back')}Back</button>
+      <button class="btn primary" data-next>${last ? ico('check') + 'Finish' : 'Next ' + ico('next')}</button>
+    </div></div>
+  </div>`;
+}
+
+function logSession(count){
+  const mins = Math.max(1, Math.round((Date.now() - F.began) / 60000));
+  S.log.push({date: ymd(new Date()), name: F.prog.name, count, mins, feel: null});
+  if (S.log.length > 400) S.log = S.log.slice(-400);
+  save(); F.logIdx = S.log.length - 1;
+}
+function stepTo(i){
+  if (canSpeak && speaking) { try { speechSynthesis.cancel(); } catch {} speaking = null; }
+  F.i = i; loadStep(); renderFA();
+  const fa = overlay.querySelector('.fa'); if (fa) fa.scrollTop = 0;
+}
+function closeFA(){
+  clearInterval(tick); tick = null; F = null; keepAwake(false);
+  if (canSpeak) { try { speechSynthesis.cancel(); } catch {} speaking = null; }
+  renderFA(); render();
+}
+
+/* ---------- Events ---------- */
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('button, [data-close-sheet]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.closeSheet !== undefined && (t.tagName === 'BUTTON' || ev.target === t)) { overlay.innerHTML = ''; if (F) renderFA(); return; }
+  if (d.tab) return go(d.tab);
+  if (d.back !== undefined) { return go(tab); }
+  if (d.openProgram) return go(tab, {type:'program', id:d.openProgram});
+  if (d.openEx) return go(tab, {type:'exercise', id:d.openEx});
+  if (d.start) { const p = getProgram(d.start); if (p) startSession(p); return; }
+  if (d.startEx) { const e = EXM[d.startEx]; startSession({id:'single', name:e.name, cat:e.category, ex:[e.id]}); return; }
+  if (d.filter) { exFilter = d.filter; return render(); }
+  if (t.id === 'seated-switch') { S.seatedOnly = !S.seatedOnly; save(); return render(); }
+  if (d.fav) { const i = S.favs.indexOf(d.fav); i < 0 ? S.favs.push(d.fav) : S.favs.splice(i, 1); save(); return render(); }
+  if (d.speak) { return speak(EXM[d.speak], t); }
+  if (d.act === 'welcomed') { S.welcomed = true; save(); return render(); }
+  if (d.size) { S.size = d.size; save(); applyPrefs(); if (overlay.querySelector('.sheet')) sizeSheet(); return render(); }
+  if (d.themeSet) { S.theme = d.themeSet; save(); applyPrefs(); return render(); }
+  if (t.id === 'size-btn') return sizeSheet();
+  // follow-along
+  if (!F) return;
+  if (d.timer !== undefined) return toggleTimer();
+  if (d.reset !== undefined) return resetTimer();
+  if (d.next !== undefined) {
+    if (F.i < F.prog.ex.length - 1) return stepTo(F.i + 1);
+    clearInterval(tick); tick = null; logSession(F.prog.ex.length); F.finished = true; keepAwake(false); return renderFA();
+  }
+  if (d.prev !== undefined) { if (F.i > 0) stepTo(F.i - 1); return; }
+  if (d.end !== undefined) { F.confirm = true; renderFA(); overlay.querySelector('.fa').scrollTop = 0; return; }
+  if (d.keep !== undefined) { F.confirm = false; return renderFA(); }
+  if (d.confirmEnd !== undefined) {
+    if (F.i > 0 || F.left !== (EXM[F.prog.ex[F.i]].mode === 'timer' ? F.total : 0)) logSession(F.i + (F.timeUp ? 1 : 0) || 1);
+    return closeFA();
+  }
+  if (d.feel) { F.feel = d.feel; if (F.logIdx != null && S.log[F.logIdx]) { S.log[F.logIdx].feel = d.feel; save(); } return renderFA(); }
+  if (d.closeFa !== undefined) return closeFA();
+});
+document.addEventListener('visibilitychange', () => { if (F && !F.finished && document.visibilityState === 'visible') keepAwake(true); });
+
+applyPrefs();
+render();
+})();
+</script>
+
+</body>
+</html>
