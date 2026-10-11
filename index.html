@@ -61,7 +61,8 @@
 :root[data-size="largest"]{font-size:27px}
 
 *{box-sizing:border-box}
-html,body{height:100%}
+html{height:100%}
+body{min-height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
@@ -226,6 +227,27 @@ main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px 
 .help p+p{margin-top:10px}
 .help ol{margin:8px 0 0;padding-left:1.3rem;display:flex;flex-direction:column;gap:6px}
 .fine{font-size:.85rem;color:var(--ink-2);margin-top:22px}
+
+/* Tour */
+.tour-layer{position:fixed;inset:0;z-index:80}
+.tour-layer.dim{background:var(--scrim)}
+.tour-hole{position:fixed;border-radius:18px;box-shadow:0 0 0 9999px var(--scrim),0 0 0 4px var(--accent);pointer-events:none}
+.tour-card{position:fixed;left:var(--gut);right:var(--gut);max-width:528px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(100% - 20px)}
+.tour-card.center{top:50%;transform:translateY(-50%);max-height:calc(100% - 32px)}
+.tour-card h2{font-size:1.4rem}
+.tour-text{font-size:1.05rem}
+.tour-list{margin:10px 0;padding-left:1.4rem;display:flex;flex-direction:column;gap:6px}
+.tour-pic{width:72px;height:72px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.tour-pic svg{width:40px;height:40px}
+.tour-dots{display:flex;gap:6px;flex-wrap:wrap}
+.tour-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.tour-dots i.past{background:var(--accent-soft)}
+.tour-dots i.on{background:var(--accent);width:24px;border-radius:5px}
+.tour-card{padding-bottom:0}
+.tour-foot{position:sticky;bottom:0;margin-top:auto;background:var(--surface);padding-block:8px 16px;display:flex;flex-direction:column;align-items:stretch}
+.tour-btns{display:grid;grid-template-columns:1fr 1.6fr;gap:10px}
+.tour-skip{min-height:44px;font-weight:700;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+@media (prefers-reduced-motion: reduce){.tour-hole{transition:none}}
 </style>
 
 <header class="hdr"><div class="hdr-in">
@@ -449,7 +471,8 @@ function welcomeCard(){
     <h2 style="font-size:1.3rem">Welcome to Willow</h2>
     <p>Each day there's a short routine ready for you. Tap <b>Start</b> and the app walks you through one exercise at a time, with a video and a timer.</p>
     <div class="tip">${ico('shield')}<div><b>Before you begin</b>Check with your doctor before starting a new exercise routine. Stop if you feel pain, dizziness, chest pain or shortness of breath.</div></div>
-    <button class="btn primary wide" data-act="welcomed">Got it</button>
+    <button class="btn primary wide" data-tour>${ico('play')}Show me around</button>
+    <button class="btn quiet wide small" data-act="welcomed">Skip the tour</button>
   </div>`;
 }
 
@@ -599,6 +622,7 @@ function weekView(){
     <p><b>Too hard or too easy?</b> Do fewer reps, hold for less time, or stay seated. Use <b>Only show seated</b> on the Exercises page to see chair-only moves.</p>
     <p><b>Put Willow on your home screen.</b></p>
     <ol><li>Open Willow's link in Safari (iPhone) or Chrome (Android).</li><li>Tap the Share button, or the ⋮ menu on Android.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>
+    <button class="btn wide" style="margin-top:14px" data-tour>${ico('play')}Take the tour again</button>
   </div>
   <div class="tip" style="margin-top:16px">${ico('shield')}<div><b>Stay safe</b>Check with your doctor before starting a new exercise routine. Stop and rest if you feel pain, dizziness, chest pain or shortness of breath.</div></div>
   <p class="fine">Videos belong to their creators and play from YouTube. Willow keeps your history on this phone only.</p>`;
@@ -745,6 +769,12 @@ document.addEventListener('click', ev => {
   if (d.fav) { const i = S.favs.indexOf(d.fav); i < 0 ? S.favs.push(d.fav) : S.favs.splice(i, 1); save(); return render(); }
   if (d.speak) { return speak(EXM[d.speak], t); }
   if (d.act === 'welcomed') { S.welcomed = true; save(); return render(); }
+  if (d.tour !== undefined) { S.welcomed = true; save(); return startTour(); }
+  if (T) {
+    if (d.tourNext !== undefined) return tourStep(T.i + 1);
+    if (d.tourBack !== undefined) return tourStep(T.i - 1);
+    if (d.tourEnd !== undefined) return endTour();
+  }
   if (d.size) { S.size = d.size; save(); applyPrefs(); if (overlay.querySelector('.sheet')) sizeSheet(); return render(); }
   if (d.themeSet) { S.theme = d.themeSet; save(); applyPrefs(); return render(); }
   if (t.id === 'size-btn') return sizeSheet();
@@ -767,6 +797,117 @@ document.addEventListener('click', ev => {
   if (d.closeFa !== undefined) return closeFA();
 });
 document.addEventListener('visibilitychange', () => { if (F && !F.finished && document.visibilityState === 'visible') keepAwake(true); });
+
+/* ---------- Tour ---------- */
+// sel: element to point at (null = centered card). tab: which tab to show first.
+const TOUR = [
+  {sel:null, tab:'today', title:'Welcome to Willow', text:"Here's a quick look around. It takes about a minute. Tap <b>Next</b> to keep going, or <b>Close</b> anytime.", pic:'leaf'},
+  {sel:'.today-card', tab:'today', title:"Today's routine", text:'Each day a short routine is waiting here. Tap the green <b>Start</b> button and Willow walks you through it.'},
+  {sel:'.week', tab:'today', title:'Your week', text:'Each day you exercise, a leaf fills in. Any little bit counts.'},
+  {sel:'#size-btn', tab:'today', title:'Make the words bigger', text:'Tap these letters anytime to make the words larger or smaller.'},
+  {sel:'[data-tab="programs"]', tab:'programs', title:'Programs', text:'More routines to choose from: chair, balance, tai chi, stretching, and hands and feet.'},
+  {sel:'[data-tab="exercises"]', tab:'exercises', title:'Exercises', text:'Every exercise on its own, each with a video. Tap one to see how. Tap the <b>heart</b> to save your favorites.'},
+  {sel:'#seated-switch', tab:'exercises', title:'Only seated', text:'Turn this on to see only the exercises you can do sitting in a chair.'},
+  {sel:'[data-tab="week"]', tab:'week', title:'My Week', text:"See what you've done, change the text size and colors, and find help."},
+  {sel:null, tab:'today', title:'During a routine', text:'You see one exercise at a time.<ol class="tour-list"><li>Watch the video.</li><li>Tap <b>Start timer</b> and do the exercise.</li><li>Tap <b>Next</b> when you are ready.</li></ol>Tap <b>End</b> anytime. What you did still counts.', pic:'play'},
+  {sel:null, tab:'today', title:"You're all set", text:'Check with your doctor before starting a new routine. Stop and rest if anything hurts or you feel dizzy.<br><br>Enjoy moving!', pic:'shield'}
+];
+let T = null;
+const tourEl = document.createElement('div');
+tourEl.id = 'tour';
+document.body.appendChild(tourEl);
+
+function startTour(){
+  if (F) return;
+  overlay.innerHTML = '';
+  T = {i:0};
+  tab = 'today'; view = null; render();
+  tourStep(0);
+}
+function endTour(){
+  T = null; tourEl.innerHTML = '';
+  document.removeEventListener('keydown', tourKey);
+  go('today');
+}
+function tourKey(e){
+  if (!T) return;
+  if (e.key === 'Escape') endTour();
+  else if (e.key === 'ArrowRight') tourStep(T.i + 1);
+  else if (e.key === 'ArrowLeft') tourStep(T.i - 1);
+}
+function tourStep(i){
+  if (i < 0) return;
+  if (i >= TOUR.length) return endTour();
+  T.i = i;
+  const s = TOUR[i];
+  if (tab !== s.tab || view) { tab = s.tab; view = null; render(); }
+  document.removeEventListener('keydown', tourKey);
+  document.addEventListener('keydown', tourKey);
+  const target = s.sel ? document.querySelector(s.sel) : null;
+  if (target && !target.closest('.tabs, .hdr')) {
+    const r = target.getBoundingClientRect();
+    window.scrollTo({top: Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2), behavior:'instant'});
+  } else window.scrollTo(0, 0);
+  requestAnimationFrame(() => drawTour(target));
+}
+function holeRect(target){
+  const vh = window.innerHeight, vw = window.innerWidth, pad = 8, r = target.getBoundingClientRect();
+  const top = Math.max(4, r.top - pad), left = Math.max(4, r.left - pad);
+  return {top, left, w: Math.min(vw - 4, r.right + pad) - left, h: Math.min(vh - 4, r.bottom + pad) - top};
+}
+function placeTour(target){
+  const card = tourEl.querySelector('.tour-card'), holeEl = tourEl.querySelector('.tour-hole');
+  if (!card || !target) return;
+  const vh = window.innerHeight, gap = 12, margin = 10;
+  let hr = holeRect(target);
+  const ch = card.offsetHeight;
+  const fitsBelow = hr.top + hr.h + gap + ch <= vh - margin;
+  const fitsAbove = hr.top - gap - ch >= margin;
+  const fixed = target.closest('.tabs, .hdr');
+  if (!fitsBelow && !fitsAbove && !fixed) {
+    // Bring the target's top up under the header, then try again below it.
+    const hdr = Math.max(0, document.querySelector('.hdr').getBoundingClientRect().bottom);
+    window.scrollTo({top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - hdr - 12), behavior:'instant'});
+    hr = holeRect(target);
+  }
+  Object.assign(holeEl.style, {top: hr.top + 'px', left: hr.left + 'px', width: hr.w + 'px', height: hr.h + 'px'});
+  card.style.bottom = ''; card.style.maxHeight = '';
+  let top;
+  if (hr.top + hr.h + gap + ch <= vh - margin) top = hr.top + hr.h + gap;          // below the target
+  else if (hr.top - gap - ch >= margin) top = hr.top - gap - ch;                    // above the target
+  else {                                                                             // tall target: sit over its lower part
+    const maxH = Math.min(ch, Math.max(260, vh * .6));
+    card.style.maxHeight = maxH + 'px';
+    top = vh - margin - maxH;
+  }
+  card.style.top = Math.max(margin, Math.min(top, vh - margin - Math.min(ch, vh - 2 * margin))) + 'px';
+  card.style.visibility = '';
+}
+function drawTour(target){
+  if (!T) return;
+  const s = TOUR[T.i], n = TOUR.length, last = T.i === n - 1;
+  const centered = !target;
+  const hole = target ? '<div class="tour-hole"></div>' : '';
+  tourEl.innerHTML = `<div class="tour-layer${centered ? ' dim' : ''}">${hole}
+    <div class="tour-card${centered ? ' center' : ''}" style="${centered ? '' : 'visibility:hidden;top:0'}" role="dialog" aria-modal="true" aria-labelledby="tour-t" aria-describedby="tour-x">
+      ${s.pic ? `<div class="tour-pic">${ico(s.pic)}</div>` : ''}
+      <div class="tour-dots" aria-label="Step ${T.i + 1} of ${n}">${TOUR.map((_, k) => `<i class="${k === T.i ? 'on' : k < T.i ? 'past' : ''}"></i>`).join('')}</div>
+      <h2 id="tour-t">${s.title}</h2>
+      <div id="tour-x" class="tour-text">${s.text}</div>
+      <div class="tour-foot">
+        <div class="tour-btns">
+          ${T.i > 0 ? `<button class="btn small" data-tour-back>${ico('back')}Back</button>` : `<button class="btn small quiet" data-tour-end>Close</button>`}
+          <button class="btn primary small" data-tour-next id="tour-next">${last ? 'Start using Willow' : 'Next ' + ico('next')}</button>
+        </div>
+        ${T.i > 0 && !last ? `<button class="tour-skip" data-tour-end>Close the tour</button>` : ''}
+      </div>
+    </div></div>`;
+  placeTour(target);
+  const nb = document.getElementById('tour-next'); if (nb) nb.focus({preventScroll:true});
+}
+window.addEventListener('resize', () => { if (T) { const s = TOUR[T.i]; drawTour(s.sel ? document.querySelector(s.sel) : null); } });
+
+// First visit: offer the tour on the welcome card (no auto-start).
 
 applyPrefs();
 render();
