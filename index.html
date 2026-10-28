@@ -920,8 +920,7 @@ function settingsView(){
     <p class="hint">Adds a daily reminder to your phone's calendar.</p>
     <label class="lbl" for="remind-time">Time</label>
     <input class="field" type="time" id="remind-time" value="${esc(S.remind)}">
-    <button class="btn wide" data-act="remind">${ico('bell')}Add to my calendar</button>
-    ${EMBED ? '' : '<p class="hint">Works in the installed app.</p>'}</section>
+    ${EMBED ? `<button class="btn wide" data-act="remind">${ico('bell')}Add to my calendar</button>` : '<p class="hint">You can add the reminder from the installed app.</p>'}</section>
   <section class="set-block"><h2>Your history</h2>
     <p class="hint">Willow keeps your history and settings on this phone only. Nothing is sent anywhere.</p>
     ${confirmClear ? `<div class="inline-confirm"><b>Clear all your history?</b><span>Your settings stay. This can't be undone.</span><button class="btn small" data-act="clear-yes">Yes, clear it</button><button class="btn small primary" data-act="clear-no">Keep my history</button></div>`
