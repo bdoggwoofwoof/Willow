@@ -21,14 +21,15 @@
 </head>
 <body>
 <style>
-/* Layout: one-column phone app. Sticky header, scrolling content, fixed bottom tab bar, full-screen follow-along overlay.
-   Natural palette: moss, river, ochre, clay and dusk on a pale sage-stone ground (light) or deep forest (dark). Large type throughout. */
+/* Layout: one-column phone app. Sticky header (logo, colors, text size, settings), scrolling page that ends in a
+   Settings / Help / Tour / Feedback footer, fixed four-tab bar, full-screen follow-along with a fixed action footer.
+   Natural palette: moss accent on pale sage-stone (light) or deep forest (dark); category hues used only as small markers. */
 :root{
-  --bg:#f1f3ec; --surface:#fbfcf8; --sunk:#e5e9dd; --line:#d1d8c8;
-  --ink:#1c2620; --ink-2:#47544a; --ink-3:#66726a;
+  --bg:#f1f3ec; --surface:#fbfcf8; --sunk:#e3e8db; --line:#d1d8c8; --edge:#7f8b7a;
+  --ink:#1c2620; --ink-2:#47544a; --ink-3:#5b665e;
   --accent:#36613f; --accent-ink:#ffffff; --accent-soft:#dbe7d7;
   --c-chair:#36613f; --c-balance:#2d6580; --c-taichi:#765610; --c-stretch:#954629; --c-mobility:#57568a;
-  --tip-bg:#f4ecd6; --tip-ink:#5a4208;
+  --tip-bg:#f4ecd6; --tip-ink:#5a4208; --warn-bg:#f7e3dc; --warn-ink:#7a2a14;
   --scrim:rgba(20,28,22,.45);
   --display:'Lexend','Avenir Next','Segoe UI',system-ui,sans-serif;
   --body:'Atkinson Hyperlegible','Verdana',system-ui,sans-serif;
@@ -38,24 +39,24 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme:dark;
-    --bg:#121813; --surface:#1a221c; --sunk:#243026; --line:#324035;
-    --ink:#e7ede4; --ink-2:#b2bdb3; --ink-3:#8e9a90;
+    --bg:#121813; --surface:#1a221c; --sunk:#26322a; --line:#324035; --edge:#7d8c80;
+    --ink:#e7ede4; --ink-2:#b8c3b9; --ink-3:#a0aca2;
     --accent:#93c59b; --accent-ink:#0f1a12; --accent-soft:#25392b;
     --c-chair:#93c59b; --c-balance:#8cc3de; --c-taichi:#dcbc6b; --c-stretch:#e9a083; --c-mobility:#b4b3e2;
-    --tip-bg:#2e2a1c; --tip-ink:#e8d39b;
+    --tip-bg:#2e2a1c; --tip-ink:#e8d39b; --warn-bg:#3a221b; --warn-ink:#f2b8a4;
     --scrim:rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#121813; --surface:#1a221c; --sunk:#243026; --line:#324035;
-  --ink:#e7ede4; --ink-2:#b2bdb3; --ink-3:#8e9a90;
+  --bg:#121813; --surface:#1a221c; --sunk:#26322a; --line:#324035; --edge:#7d8c80;
+  --ink:#e7ede4; --ink-2:#b8c3b9; --ink-3:#a0aca2;
   --accent:#93c59b; --accent-ink:#0f1a12; --accent-soft:#25392b;
   --c-chair:#93c59b; --c-balance:#8cc3de; --c-taichi:#dcbc6b; --c-stretch:#e9a083; --c-mobility:#b4b3e2;
-  --tip-bg:#2e2a1c; --tip-ink:#e8d39b;
+  --tip-bg:#2e2a1c; --tip-ink:#e8d39b; --warn-bg:#3a221b; --warn-ink:#f2b8a4;
   --scrim:rgba(0,0,0,.6);
 }
-/* Text sizes: standard 16 · medium 18 (default, on :root) · large 21 · extra large 24 · largest 27 */
+/* Text sizes: standard 16 · medium 18 (default) · large 21 · extra large 24 · largest 27 */
 :root[data-size="standard"]{font-size:16px}
 :root[data-size="large"]{font-size:21px}
 :root[data-size="xlarge"]{font-size:24px}
@@ -63,85 +64,101 @@
 
 *{box-sizing:border-box}
 html{height:100%}
-body{min-height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
-button,input{font:inherit;color:inherit}
+body{min-height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
 a{color:var(--accent)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:10px}
 h1,h2,h3{margin:0;font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.15}
+h1:focus{outline:none}
 p{margin:0}
 svg{flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
 /* Shell */
-.hdr{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
-.hdr-in{max-width:560px;margin:0 auto;padding:10px var(--gut);display:flex;align-items:center;gap:12px;min-height:60px}
-.brand{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--accent)}
-.brand svg{width:1.5rem;height:1.5rem}
-.hdr .spacer{flex:1}
-.size-btn{min-height:48px;padding:0 16px;border-radius:999px;background:var(--sunk);font-family:var(--display);font-weight:600;font-size:1rem;display:inline-flex;align-items:center;gap:6px}
-main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px calc(120px + env(safe-area-inset-bottom,0px))}
+.hdr{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.hdr-in{max-width:560px;margin:0 auto;padding:8px 10px 8px var(--gut);display:flex;align-items:center;gap:6px;min-height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:min(1.3rem,26px);color:var(--ink);min-width:0;margin-right:auto}
+.brand img{width:34px;height:34px;border-radius:9px;flex:none}
+.hbtn{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;white-space:nowrap;color:var(--ink);background:var(--sunk);flex:none;font-family:var(--display);font-weight:600;font-size:17px}
+.hbtn svg{width:24px;height:24px}
+main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px calc(110px + env(safe-area-inset-bottom,0px))}
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(8px + env(safe-area-inset-bottom,0px))}
-.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;min-height:64px;border-radius:14px;color:var(--ink-2);font-size:min(.82rem,16px);font-weight:700;min-width:0;overflow-wrap:anywhere;text-align:center;line-height:1.15}
+.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;min-height:64px;border-radius:14px;color:var(--ink-2);font-size:clamp(14px,.82rem,17px);font-weight:700;min-width:0;text-align:center;line-height:1.15}
 .tab svg{width:28px;height:28px}
 .tab.on{color:var(--accent);background:var(--accent-soft)}
 
 /* Type + common */
-.page-h{font-size:1.75rem;margin-bottom:6px}
+.page-h{font-size:min(1.75rem,38px);margin-bottom:6px}
 .lede{color:var(--ink-2);margin-bottom:18px}
-.sec-h{font-size:1.15rem;margin:30px 0 12px}
+.sec-h{font-size:1.2rem;margin:30px 0 12px}
 .stack{display:flex;flex-direction:column;gap:12px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:60px;padding:12px 22px;border-radius:16px;font-family:var(--display);font-weight:600;font-size:1.1rem;background:var(--sunk);color:var(--ink);text-decoration:none;text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:60px;padding:12px 20px;border-radius:16px;font-family:var(--display);font-weight:600;font-size:1.1rem;background:var(--surface);color:var(--ink);border:2px solid var(--edge);text-decoration:none;text-align:center;min-width:0}
 .btn svg{width:1.4rem;height:1.4rem}
-.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.wide{width:100%}
-.btn.quiet{background:transparent;border:2px solid var(--line)}
-.btn.small{min-height:52px;font-size:1rem;padding:10px 16px}
+.btn.small{min-height:54px;font-size:1rem;padding:10px 14px}
+.btn.link{border:0;background:none;color:var(--accent);min-height:52px;padding:8px 6px;text-decoration:underline;text-underline-offset:4px}
+.btn[disabled]{opacity:.45}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
-.tag{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--sunk);color:var(--ink-2);white-space:nowrap}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--sunk);color:var(--ink-2)}
 .tag.cat{color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,var(--surface))}
 .tag svg{width:1rem;height:1rem}
 .muted{color:var(--ink-2)}
 .tip{display:flex;gap:10px;background:var(--tip-bg);color:var(--tip-ink);border-radius:14px;padding:14px 16px;font-size:.95rem}
+.tip.warn{background:var(--warn-bg);color:var(--warn-ink)}
 .tip svg{width:1.3rem;height:1.3rem;margin-top:2px}
 .tip b{display:block}
+.tip .btn{margin-top:10px}
+.prog-meta{display:flex;flex-wrap:wrap;gap:8px}
+.eyebrow{font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.needs{display:flex;gap:8px;align-items:flex-start;color:var(--ink-2);font-size:.95rem}
+.needs svg{width:1.2rem;height:1.2rem;margin-top:2px}
 
 /* Today */
-.hello{font-size:1.9rem;margin-bottom:4px}
+.hello{font-size:min(1.9rem,40px);margin-bottom:4px}
 .date{color:var(--ink-2);margin-bottom:18px}
 .today-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden}
 .today-card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:var(--cc)}
-.eyebrow{font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
-.today-card h2{font-size:1.6rem}
-.prog-meta{display:flex;flex-wrap:wrap;gap:8px}
+.today-card h2{font-size:min(1.6rem,36px)}
+.today-card .sess{font-family:var(--display);font-weight:600;color:var(--ink-2);font-size:1.1rem;margin-top:-6px}
 .ex-mini{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
 .ex-mini li{display:flex;gap:10px;align-items:baseline}
 .ex-mini li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cc);flex:none;transform:translateY(-2px)}
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.wd{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--ink-3)}
+.banner{display:flex;flex-direction:column;gap:10px;background:var(--accent-soft);border-radius:18px;padding:16px;margin-bottom:18px}
+.banner .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.85rem;font-weight:700;color:var(--ink-3);min-width:0}
 .wd i{width:100%;max-width:44px;aspect-ratio:1;border-radius:50%;background:var(--sunk);display:grid;place-items:center;color:var(--accent-ink)}
 .wd i svg{width:60%;height:60%}
 .wd.hit i{background:var(--accent)}
 .wd.now{color:var(--ink)}
-.wd.now i{box-shadow:0 0 0 2px var(--ink-2)}
+.wd.now i{box-shadow:0 0 0 3px var(--ink-2)}
 .week-note{margin-top:12px;color:var(--ink-2)}
+.mix{display:grid;gap:10px;margin-top:16px}
+.mix-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.mix-row b{font-weight:700}
+.pips{display:flex;gap:6px}
+.pips i{width:22px;height:22px;border-radius:50%;border:2px solid var(--edge)}
+.pips i.on{background:var(--accent);border-color:var(--accent)}
+.mix-row .s{grid-column:1/-1;color:var(--ink-2);font-size:.9rem;margin-top:-6px}
 
 /* Program cards + list rows */
 .p-card{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-left:8px solid var(--cc);border-radius:var(--r);padding:16px 18px}
 .p-card h3{font-size:1.25rem}
 .p-card .go{display:flex;align-items:center;gap:6px;color:var(--accent);font-family:var(--display);font-weight:600}
 .p-card .go svg{width:1.2rem;height:1.2rem}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:0 calc(var(--gut) * -1) 6px;padding-inline:var(--gut);scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{min-height:48px;padding:0 16px;border-radius:999px;background:var(--surface);border:2px solid var(--line);font-weight:700;font-size:.95rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
-.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 4px}
-.switch{width:64px;height:38px;border-radius:999px;background:var(--line);position:relative;flex:none}
-.switch::after{content:"";position:absolute;top:4px;left:4px;width:30px;height:30px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
-.switch[aria-checked="true"]{background:var(--accent)}
-.switch[aria-checked="true"]::after{transform:translateX(26px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.chip{min-height:52px;padding:0 16px;border-radius:999px;background:var(--surface);border:2px solid var(--edge);font-weight:700;font-size:.95rem;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:8px 0;width:100%;text-align:left;font-weight:700}
+.toggle-row .d{display:block;font-weight:400;color:var(--ink-2);font-size:.9rem}
+.switch{min-width:84px;height:44px;border-radius:999px;background:var(--sunk);border:2px solid var(--edge);position:relative;flex:none;display:flex;align-items:center;justify-content:flex-end;padding:0 12px;font-size:.85rem;font-weight:700;color:var(--ink-2)}
+.switch::before{content:"";position:absolute;top:4px;left:4px;width:32px;height:32px;border-radius:50%;background:var(--edge);transition:transform .2s}
+.switch.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);justify-content:flex-start}
+.switch.on::before{background:var(--accent-ink);transform:translateX(36px)}
 .ex-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 4px;border-bottom:1px solid var(--line);min-height:76px}
 .ex-ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,var(--surface));flex:none}
 .ex-ico svg{width:30px;height:30px}
@@ -152,67 +169,64 @@ main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px 
 .ex-row .fav svg{width:1.2rem;height:1.2rem}
 .chev{color:var(--ink-3);width:1.3rem;height:1.3rem}
 .empty{text-align:center;padding:30px 10px;color:var(--ink-2)}
+.sess-card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:16px;display:flex;flex-direction:column;gap:10px}
+.sess-card.next{border:2px solid var(--accent)}
+.sess-card h3{font-size:1.15rem}
+.sess-card ol{margin:0;padding-left:1.4rem;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
 
-/* Detail + follow-along shared */
-.back{display:inline-flex;align-items:center;gap:6px;min-height:52px;font-family:var(--display);font-weight:600;color:var(--accent);margin:-6px 0 6px -4px;padding:0 6px}
+/* Detail pages */
+.back{display:inline-flex;align-items:center;gap:6px;min-height:52px;font-family:var(--display);font-weight:600;color:var(--accent);margin:-6px 0 6px -6px;padding:0 8px}
 .back svg{width:1.3rem;height:1.3rem}
-.d-title{font-size:1.8rem;margin:6px 0 10px}
-.d-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.dose{font-family:var(--display);font-weight:600;font-size:1.25rem;margin-bottom:16px}
+.d-title{font-size:min(1.8rem,38px);margin:6px 0 10px}
+.d-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.dose{font-family:var(--display);font-weight:600;font-size:1.3rem;margin-bottom:14px}
 .video{border-radius:16px;overflow:hidden;background:#000;aspect-ratio:16/9;max-width:100%;width:100%}
 .video iframe{width:100%;height:100%;border:0;display:block}
-.vid-src{font-size:.88rem;color:var(--ink-2);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
-.vid-src a{font-weight:700}
-.watch{display:flex;align-items:center;gap:14px;width:100%;text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:14px 16px;min-height:76px}
+.vid-src{font-size:.9rem;color:var(--ink-2);margin-top:8px}
+.vid-alt{margin-top:8px}
+.watch{display:flex;align-items:center;gap:14px;width:100%;text-decoration:none;color:var(--ink);background:var(--surface);border:2px solid var(--edge);border-radius:16px;padding:14px 16px;min-height:76px}
 .watch .play{width:52px;height:52px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
 .watch .play svg{width:26px;height:26px;margin-left:3px}
 .watch .t{font-family:var(--display);font-weight:600;font-size:1.1rem}
-.watch .s{font-size:.88rem;color:var(--ink-2)}
+.watch .s{font-size:.9rem;color:var(--ink-2)}
 .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
 .steps li{display:flex;gap:14px;align-items:flex-start;font-size:1.05rem}
 .steps li::before{counter-increment:s;content:counter(s);width:2rem;height:2rem;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--display);font-weight:600;display:grid;place-items:center;flex:none;font-size:.95rem}
-.act-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.act-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.easier{display:flex;gap:10px;border-left:4px solid var(--accent);padding:6px 0 6px 12px;color:var(--ink-2)}
 
-/* Follow-along overlay */
-.fa{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px)}
-.fa-top{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line)}
-.fa-top-in{max-width:560px;margin:0 auto;padding:8px var(--gut);display:flex;align-items:center;gap:12px;min-height:64px}
-.fa-top .count{font-family:var(--display);font-weight:600;font-size:1.05rem;flex:1}
-.bar{height:8px;background:var(--sunk)}
-.bar>div{height:100%;background:var(--accent);transition:width .3s}
-.fa-body{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:16px calc(150px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
-.fa-foot{position:fixed;left:0;right:0;bottom:0;z-index:3;background:var(--surface);border-top:1px solid var(--line);padding:10px var(--gut) calc(12px + env(safe-area-inset-bottom,0px))}
-.fa-foot-in{max-width:528px;margin:0 auto;display:grid;grid-template-columns:1fr 2fr;gap:10px}
-.timer{display:flex;align-items:center;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px}
-.ring{position:relative;width:120px;height:120px;flex:none}
-.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.ring .tr{fill:none;stroke:var(--sunk);stroke-width:10}
-.ring .pr{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .9s linear}
-.ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:1.9rem;font-variant-numeric:tabular-nums}
-.timer{flex-wrap:wrap;justify-content:center}
-.timer-side{display:flex;flex-direction:column;gap:10px;flex:1 1 9.5rem;min-width:0}
-.timer-side .lbl{font-weight:700;color:var(--ink-2)}
-.timer-side .done-msg{font-weight:700;color:var(--accent)}
-.stop-note{font-size:.9rem;color:var(--ink-2);text-align:center}
-.confirm{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px}
-.finish{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;padding-top:20px}
-.finish .leaf{width:96px;height:96px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
-.finish .leaf svg{width:56px;height:56px}
-.finish h2{font-size:2rem}
-.feel{display:grid;grid-template-columns:1fr;gap:10px;width:100%}
-.feel .btn.on{background:var(--accent);color:var(--accent-ink)}
+/* Page footer: the same four helpers at the end of every page */
+.pfoot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line)}
+.pfoot h2{font-size:1rem;color:var(--ink-2);font-family:var(--body);font-weight:700;margin-bottom:10px}
+.pfoot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pfoot .btn{flex-direction:column;gap:4px;min-height:84px;padding:10px 8px;font-size:1rem}
+.pfoot .btn svg{width:1.6rem;height:1.6rem}
+.pfoot .note{font-size:.85rem;color:var(--ink-2);margin-top:14px;text-align:center}
 
-/* Sheet */
-.sheet-wrap{position:fixed;inset:0;z-index:60;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px var(--gut) calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
-.sizes{display:flex;flex-direction:column;gap:8px}
-.opt .sample{font-family:var(--display);font-weight:600;width:3.4rem;flex:none;text-align:center;line-height:1}
-.opt .lbl{display:flex;flex-direction:column;min-width:0}
-.opt .lbl b{font-weight:700}
-.opt .lbl span{font-size:.85rem;color:var(--ink-2)}
-.sheet h2{font-size:1.35rem}
-.opt{display:flex;align-items:center;gap:14px;min-height:64px;padding:10px 16px;border-radius:14px;border:2px solid var(--line);text-align:left;width:100%}
+/* Settings / help / feedback */
+.opt-list{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:center;gap:14px;min-height:64px;padding:10px 16px;border-radius:14px;border:2px solid var(--edge);text-align:left;width:100%;background:var(--surface)}
 .opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt .sample{font-family:var(--display);font-weight:600;width:3.4rem;flex:none;text-align:center;line-height:1}
+.opt .lbl{display:flex;flex-direction:column;min-width:0;flex:1}
+.opt .lbl b{font-weight:700}
+.opt .lbl span{font-size:.88rem;color:var(--ink-2)}
+.opt .chk{width:1.5rem;height:1.5rem;color:var(--accent)}
+.swatch{width:3.4rem;height:2.6rem;border-radius:10px;flex:none;border:2px solid var(--edge);display:grid;place-items:center;font-family:var(--display);font-weight:600}
+.set-block{display:flex;flex-direction:column;gap:10px}
+.set-block+.set-block{margin-top:28px}
+.set-block h2{font-size:1.2rem}
+.set-block .hint{color:var(--ink-2);font-size:.92rem;margin-top:-4px}
+.help-sec{display:flex;flex-direction:column;gap:8px}
+.help-sec+.help-sec{margin-top:24px}
+.help-sec h2{font-size:1.2rem}
+.help-sec ol,.help-sec ul{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:6px}
+textarea.field,input.field,select.field{width:100%;background:var(--surface);border:2px solid var(--edge);border-radius:14px;padding:14px;font-size:1.05rem}
+textarea.field{min-height:160px;resize:vertical;line-height:1.45}
+textarea.field:focus,input.field:focus,select.field:focus{outline:3px solid var(--accent);outline-offset:1px}
+label.lbl{display:block;font-weight:700;margin-bottom:8px}
+.status{color:var(--accent);font-weight:700}
+.inline-confirm{display:flex;flex-direction:column;gap:10px;border:2px solid var(--warn-ink);border-radius:16px;padding:14px}
 
 /* My Week */
 .log-item{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}
@@ -221,19 +235,53 @@ main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px 
 .date-chip b{font-family:var(--display);font-size:1.5rem;line-height:1.1}
 .log-item .t{font-weight:700}
 .log-item .s{color:var(--ink-2);font-size:.92rem}
-.set-group{display:flex;flex-direction:column;gap:10px}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--sunk);border-radius:14px;padding:5px}
-.seg button{min-height:52px;border-radius:10px;font-weight:700}
-.seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.18)}
-.help p+p{margin-top:10px}
-.help ol{margin:8px 0 0;padding-left:1.3rem;display:flex;flex-direction:column;gap:6px}
-.fine{font-size:.85rem;color:var(--ink-2);margin-top:22px}
+.minutes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+
+/* Follow-along */
+.fa{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px)}
+.fa-top{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line)}
+.fa-top-in{max-width:560px;margin:0 auto;padding:8px var(--gut);display:flex;align-items:center;gap:12px;min-height:64px}
+.fa-top .count{font-family:var(--display);font-weight:600;font-size:min(1.05rem,21px);flex:1;min-width:0}
+.bar{height:8px;background:var(--sunk)}
+.bar>div{height:100%;background:var(--accent);transition:width .3s}
+.fa-body{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:16px calc(150px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px}
+.fa-foot{position:fixed;left:0;right:0;bottom:0;z-index:3;background:var(--surface);border-top:1px solid var(--line);padding:10px var(--gut) calc(12px + env(safe-area-inset-bottom,0px))}
+.fa-foot-in{max-width:528px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.8fr);gap:10px}
+.fa-foot-in.one{grid-template-columns:minmax(0,1fr)}
+.fa-foot .btn{min-height:64px;padding:10px 12px;font-size:min(1.1rem,22px)}
+.fa-top .btn{font-size:min(1rem,20px)}
+.timer{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px}
+.ring{position:relative;width:min(7rem,140px);height:min(7rem,140px);min-width:110px;min-height:110px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .tr{fill:none;stroke:var(--sunk);stroke-width:10}
+.ring .pr{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round}
+.ring .num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:min(1.9rem,40px);font-variant-numeric:tabular-nums}
+.timer-side{display:flex;flex-direction:column;gap:6px;flex:1 1 9rem;min-width:0}
+.timer-side .lbl{font-weight:700;font-size:1.1rem}
+.timer-side .sub{color:var(--ink-2)}
+.timer-side .done-msg{font-weight:700;color:var(--accent);font-size:1.1rem}
+.reps-box{display:flex;flex-direction:column;gap:6px;background:var(--accent-soft);border-radius:20px;padding:18px}
+.reps-box>b{font-family:var(--display);font-size:1.5rem;font-weight:600}
+.stop-note{font-size:.95rem;color:var(--ink-2);text-align:center}
+.confirm{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:2px solid var(--edge);border-radius:18px;padding:16px}
+.center-page{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center;padding-top:16px}
+.center-page .leaf{width:96px;height:96px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.center-page .leaf svg{width:56px;height:56px}
+.center-page h2{font-size:2rem}
+.feel{display:grid;grid-template-columns:1fr;gap:10px;width:100%}
+.feel .btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.ready-list{text-align:left;width:100%;display:flex;flex-direction:column;gap:10px}
+
+/* Sheet (text size) */
+.sheet-wrap{position:fixed;inset:0;z-index:60;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px var(--gut) calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.sheet h2{font-size:1.35rem}
 
 /* Tour */
 .tour-layer{position:fixed;inset:0;z-index:80}
 .tour-layer.dim{background:var(--scrim)}
 .tour-hole{position:fixed;border-radius:18px;box-shadow:0 0 0 9999px var(--scrim),0 0 0 4px var(--accent);pointer-events:none}
-.tour-card{position:fixed;left:var(--gut);right:var(--gut);max-width:528px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(100% - 20px)}
+.tour-card{position:fixed;left:var(--gut);right:var(--gut);max-width:528px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 20px 0;box-shadow:0 12px 40px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:12px;overflow-y:auto;max-height:calc(100% - 20px)}
 .tour-card.center{top:50%;transform:translateY(-50%);max-height:calc(100% - 32px)}
 .tour-card h2{font-size:1.4rem}
 .tour-text{font-size:1.05rem}
@@ -242,28 +290,33 @@ main{max-width:560px;margin:0 auto;padding-inline:var(--gut);padding-block:18px 
 .tour-pic svg{width:40px;height:40px}
 .tour-dots{display:flex;gap:6px;flex-wrap:wrap}
 .tour-dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
-.tour-dots i.past{background:var(--accent-soft)}
+.tour-dots i.past{background:var(--edge)}
 .tour-dots i.on{background:var(--accent);width:24px;border-radius:5px}
-.tour-card{padding-bottom:0}
-.tour-foot{position:sticky;bottom:0;margin-top:auto;background:var(--surface);padding-block:8px 16px;display:flex;flex-direction:column;align-items:stretch}
-.tour-btns{display:grid;grid-template-columns:1fr 1.6fr;gap:10px}
-.tour-skip{min-height:44px;font-weight:700;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
-@media (prefers-reduced-motion: reduce){.tour-hole{transition:none}}
+.tour-foot{position:sticky;bottom:0;margin-top:auto;background:var(--surface);padding-block:8px 16px;display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.tour-btns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:10px}
+.btn.off{opacity:.45}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;max-width:calc(100% - 32px);text-align:center}
 </style>
 
 <header class="hdr"><div class="hdr-in">
-  <div class="brand" aria-label="Willow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c0 6-1 10-4 13"/><path d="M12 3c0 6 1 10 4 13"/><path d="M12 3v18"/><path d="M8 16c-1 2-1 4 0 5"/><path d="M16 16c1 2 1 4 0 5"/></svg>Willow</div>
-  <div class="spacer"></div>
-  <button class="size-btn" id="size-btn" aria-label="Text size">A<span style="font-size:1.25em">A</span></button>
+  <div class="brand"><img alt="" src="data:image/png;base64,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">Willow</div>
+  <button class="hbtn" id="theme-btn" aria-label="Switch colors"></button>
+  <button class="hbtn" id="size-btn" aria-label="Text size">A<span style="font-size:1.3em">A</span></button>
+  <button class="hbtn" id="set-btn" aria-label="Settings"></button>
 </div></header>
 <main id="main"></main>
 <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs"></div></nav>
 <div id="overlay"></div>
+<div id="tour"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
 'use strict';
-const EMBED = !!window.WILLOW_EMBED;
+const EMBED = !!window.WILLOW_EMBED;            // true on the hosted app (videos play inline, offline cache, reminders)
+const VERSION = '2.0';
+// Where "Send feedback" and "Share my week" go. Leave blank to let her pick the person in her messages / mail app.
+const FEEDBACK = { name: '', phone: '', email: '' };
 
 /* ---------- Icons ---------- */
 const I = {
@@ -290,22 +343,33 @@ const I = {
   check:'<path d="M5 12l5 5 9-10"/>',
   close:'<path d="M6 6l12 12M18 6L6 18"/>',
   next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
-  ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>'
+  ext:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.7-2.5 2-2.5 3.5"/><path d="M12 17h.01"/>',
+  tour:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/>',
+  walk:'<circle cx="13" cy="4" r="2"/><path d="M10 21l2-6 3 3v3M9 12l2-4 4 1 2 4M11 8l-2 5"/>',
+  bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/>',
+  needs:'<path d="M9 4h6M8 4h8v4H8z"/><path d="M6 8h12v12H6z"/><path d="M9 13l2 2 4-4"/>',
+  share:'<path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>'
 };
 const ico = (k, cls='') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[k]}</svg>`;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* ---------- Data ---------- */
+/* ---------- Exercises ---------- */
 const CATS = {
   chair:{name:'Chair & strength', short:'Strength', icon:'chair'},
   balance:{name:'Balance', short:'Balance', icon:'balance'},
   taichi:{name:'Tai chi & qigong', short:'Tai chi', icon:'taichi'},
-  stretch:{name:'Stretching', short:'Stretch', icon:'stretch'},
-  mobility:{name:'Hands, feet & breathing', short:'Mobility', icon:'mobility'}
+  stretch:{name:'Stretching', short:'Stretching', icon:'stretch'},
+  mobility:{name:'Hands, feet & breathing', short:'Hands & feet', icon:'mobility'}
 };
-const POS = {seated:'Seated', 'standing-with-support':'Hold a chair', standing:'Standing'};
+const POS = {seated:'Seated', 'stands-up':'Stands up from a chair', 'standing-with-support':'Hold a chair or counter', standing:'Standing'};
 
-// mode "timer": count down secs. mode "video": follow the video, timer counts up.
 const EX = [
  {id:'seated-marching',name:'Seated Marching',category:'chair',position:'seated',level:'gentle',dose:'30–60 seconds',secs:60,mode:'timer',steps:['Sit tall near the front of a sturdy chair.','Lift your right knee a few inches, then lower it.','Lift your left knee, then lower it.','Keep marching at a steady, comfortable pace.'],tip:'Hold the chair seat if you feel unsteady. Keep breathing.',video:{id:'1m72e65YZtM',start:0,channel:'Medbridge'}},
  {id:'seated-knee-extension',name:'Seated Leg Straightening',category:'chair',position:'seated',level:'gentle',dose:'10 slow reps, each leg',secs:90,mode:'timer',steps:['Sit back in a sturdy chair, feet flat.','Slowly straighten one knee until the leg is level.','Hold for 2 seconds, squeezing the thigh.','Lower slowly and switch legs.'],tip:"Move slowly and don't lock or snap the knee.",video:{id:'VuJZ6dqMf8M',start:0,channel:'Ask Doctor Jo (physical therapist)'}},
@@ -340,247 +404,447 @@ const EX = [
  {id:'deep-breathing',name:'Deep Belly Breathing',category:'mobility',position:'seated',level:'gentle',dose:'1–2 minutes',secs:90,mode:'timer',steps:['Sit comfortably with one hand on your belly.','Breathe in slowly through your nose. Let your belly rise.','Breathe out slowly through pursed lips.','Keep your shoulders relaxed.'],tip:'If you feel dizzy, go back to normal breathing.',video:{id:'W9Gx6sT-W1A',start:0,channel:'Hinge Health'}},
  {id:'getting-up-from-floor',name:'Getting Up From the Floor',category:'mobility',position:'standing-with-support',level:'moderate',dose:'Practice once or twice',secs:300,mode:'video',steps:['Roll onto your side, then up onto hands and knees.','Crawl to a sturdy chair.','Put your hands on the seat and bring one foot forward.','Push up slowly, then turn and sit.'],tip:'Practice only with a helper nearby. Rest before getting up.',video:{id:'wMGANlT9vlM',start:0,channel:'Ask Doctor Jo (physical therapist)'}}
 ];
-const EXM = Object.fromEntries(EX.map(e => [e.id, e]));
 
+const EXM = Object.fromEntries(EX.map(e => [e.id, e]));
+// Corrections from the Oct 28 audit
+EXM['sit-to-stand'].position = 'stands-up';
+EXM['chest-stretch'].position = 'seated';
+EXM['chest-stretch'].steps[0] = 'Sit or stand tall with arms at your sides.';
+
+// How each exercise is done in a routine:
+//  reps  -> no clock; do the reps, tap "I'm done"
+//  hold  -> a hold timer of `hold` seconds, repeated `rounds` times (2 = each side)
+//  time  -> one countdown of `secs`
+//  video -> follow the video; no timer
+const HOW = {
+  'seated-marching':{kind:'time',secs:45}, 'seated-knee-extension':{kind:'reps'}, 'sit-to-stand':{kind:'reps'},
+  'overhead-arm-raise':{kind:'reps'}, 'seated-heel-toe-raises':{kind:'reps'}, 'seated-torso-twist':{kind:'reps'},
+  'wall-push-up':{kind:'reps'}, 'seated-bicep-curl':{kind:'reps'}, 'heel-to-toe-walk':{kind:'reps'},
+  'stand-on-one-foot':{kind:'hold',hold:10,rounds:2,sides:true}, 'side-leg-raise':{kind:'reps'}, 'back-leg-raise':{kind:'reps'},
+  'heel-raises-at-counter':{kind:'reps'}, 'side-weight-shifts':{kind:'reps'},
+  'neck-side-stretch':{kind:'hold',hold:20,rounds:2,sides:true}, 'nia-shoulder-arm-stretch':{kind:'hold',hold:20,rounds:2,sides:true},
+  'chest-stretch':{kind:'hold',hold:20,rounds:2}, 'seated-hamstring-stretch':{kind:'hold',hold:20,rounds:2,sides:true},
+  'calf-stretch-wall':{kind:'hold',hold:20,rounds:2,sides:true}, 'nia-ankle-stretch':{kind:'hold',hold:15,rounds:3},
+  'hand-grip':{kind:'reps'}, 'hand-finger-stretches':{kind:'time',secs:120}, 'ankle-circles':{kind:'reps'},
+  'deep-breathing':{kind:'time',secs:90}
+};
+EX.forEach(e => { if (!HOW[e.id]) HOW[e.id] = e.mode === 'video' ? {kind:'video'} : {kind:'time', secs:e.secs}; });
+
+// What to set out before starting
+const NEEDS = {
+  chair:'A sturdy chair without wheels', counter:'A counter or chair back to hold', wall:'A clear bit of wall',
+  towel:'A small towel', weights:'Light weights or two soup cans (optional)', ball:'A soft ball or rolled-up sock',
+  space:'A clear space with a chair nearby', helper:'Someone nearby to help'
+};
+const EX_NEEDS = {
+  'seated-marching':['chair'],'seated-knee-extension':['chair'],'sit-to-stand':['chair'],'overhead-arm-raise':['chair','weights'],
+  'seated-heel-toe-raises':['chair'],'seated-torso-twist':['chair'],'wall-push-up':['wall'],'seated-bicep-curl':['chair','weights'],
+  'heel-to-toe-walk':['counter'],'stand-on-one-foot':['counter'],'side-leg-raise':['counter'],'back-leg-raise':['counter'],
+  'heel-raises-at-counter':['counter'],'side-weight-shifts':['counter'],'seated-tai-chi':['chair'],'seated-qigong':['chair'],
+  'tai-chi-for-arthritis':['space'],'tai-chi-for-beginners':['space'],'tai-chi-arthritis-class':['space'],'tai-chi-walking':['counter'],
+  'neck-side-stretch':['chair'],'nia-shoulder-arm-stretch':['chair','towel'],'chest-stretch':['chair'],'seated-hamstring-stretch':['chair'],
+  'calf-stretch-wall':['wall'],'nia-ankle-stretch':['chair'],'hand-grip':['ball'],'hand-finger-stretches':['chair'],'ankle-circles':['chair'],
+  'seated-hip-mobility':['chair'],'deep-breathing':['chair'],'getting-up-from-floor':['chair','helper']
+};
+// An easier way to do the harder moves
+const EASIER = {
+  'sit-to-stand':'Use your hands on the armrests to help push up, or just practice leaning forward and back.',
+  'wall-push-up':'Stand closer to the wall and bend your elbows only a little.',
+  'heel-to-toe-walk':'Keep a small gap between heel and toe, and keep both hands on the counter.',
+  'stand-on-one-foot':'Keep both hands on the chair and lift your foot just off the floor.',
+  'side-leg-raise':'Make the lift very small, and hold on with both hands.',
+  'back-leg-raise':'Make the lift very small, and hold on with both hands.',
+  'heel-raises-at-counter':'Rise up only halfway, holding on with both hands.',
+  'seated-knee-extension':'Straighten your leg only partway.',
+  'overhead-arm-raise':'Use no weights, and raise your arms only to shoulder height.',
+  'seated-bicep-curl':'Use no weights at all.',
+  'tai-chi-walking':'Take smaller steps and keep one hand on the counter the whole time.',
+  'calf-stretch-wall':'Take a smaller step back.',
+  'seated-hamstring-stretch':'Keep your knee slightly bent and lean forward less.',
+  'side-weight-shifts':'Keep both hands on the counter and shift only a little.'
+};
+
+/* ---------- Programs (each has sessions that take turns) ---------- */
 const PROGRAMS = [
- {id:'morning-chair',name:'Morning Chair Routine',cat:'chair',blurb:'Wake up the whole body without leaving your seat.',ex:['seated-marching','seated-heel-toe-raises','overhead-arm-raise','seated-knee-extension','seated-torso-twist','neck-side-stretch','deep-breathing']},
- {id:'steady',name:'Steady on Your Feet',cat:'balance',blurb:'Balance practice with a chair to hold. Helps prevent falls.',ex:['side-weight-shifts','heel-raises-at-counter','stand-on-one-foot','side-leg-raise','back-leg-raise','heel-to-toe-walk']},
- {id:'taichi-seated',name:'Tai Chi, Sitting Down',cat:'taichi',blurb:'Slow, flowing tai chi from your chair, then quiet breathing.',ex:['seated-tai-chi','deep-breathing']},
- {id:'taichi-first',name:'Tai Chi First Steps',cat:'taichi',blurb:'A gentle standing lesson made for sore joints.',ex:['tai-chi-for-arthritis','tai-chi-walking']},
- {id:'stronger',name:'Stronger Legs & Arms',cat:'chair',blurb:'Builds the strength for stairs, groceries and getting up.',ex:['sit-to-stand','wall-push-up','seated-bicep-curl','overhead-arm-raise','heel-raises-at-counter','seated-knee-extension']},
- {id:'unwind',name:'Stretch & Unwind',cat:'stretch',blurb:'Loosen up stiff spots, top to bottom.',ex:['neck-side-stretch','nia-shoulder-arm-stretch','chest-stretch','seated-hamstring-stretch','calf-stretch-wall','nia-ankle-stretch','deep-breathing']},
- {id:'hands-feet',name:'Hands & Feet',cat:'mobility',blurb:'For stiff fingers and ankles. Easy to do while watching TV.',ex:['hand-grip','hand-finger-stretches','ankle-circles','nia-ankle-stretch','seated-heel-toe-raises']}
+ {id:'stronger', name:'Stronger Legs & Arms', cat:'chair', kind:'strength',
+  blurb:'Builds the strength for stairs, groceries and getting up from a chair.',
+  sessions:[
+   {name:'Legs', ex:['seated-marching','sit-to-stand','seated-knee-extension','heel-raises-at-counter','side-leg-raise','seated-hamstring-stretch']},
+   {name:'Arms', ex:['seated-marching','wall-push-up','seated-bicep-curl','overhead-arm-raise','hand-grip','chest-stretch']},
+   {name:'Whole body', ex:['seated-marching','sit-to-stand','wall-push-up','back-leg-raise','seated-bicep-curl','calf-stretch-wall']}
+  ]},
+ {id:'steady', name:'Steady on Your Feet', cat:'balance', kind:'balance',
+  blurb:'Balance practice holding a counter. Helps prevent falls.',
+  sessions:[
+   {name:'Side to side', ex:['seated-marching','side-weight-shifts','heel-raises-at-counter','stand-on-one-foot','side-leg-raise','calf-stretch-wall']},
+   {name:'Front to back', ex:['seated-marching','side-weight-shifts','back-leg-raise','heel-to-toe-walk','heel-raises-at-counter','calf-stretch-wall']},
+   {name:'Steady steps', ex:['seated-marching','side-weight-shifts','stand-on-one-foot','heel-to-toe-walk','tai-chi-walking']}
+  ]},
+ {id:'taichi-first', name:'Tai Chi Standing', cat:'taichi', kind:'balance',
+  blurb:'Slow, gentle tai chi on your feet. Good for balance and sore joints.',
+  sessions:[
+   {name:'Tai Chi for Arthritis', ex:['tai-chi-for-arthritis','deep-breathing']},
+   {name:'Beginner lesson', ex:['tai-chi-for-beginners','deep-breathing']},
+   {name:'Tai chi walking', ex:['side-weight-shifts','tai-chi-walking','calf-stretch-wall']},
+   {name:'Full class with Dr. Lam', ex:['tai-chi-arthritis-class']}
+  ]},
+ {id:'morning-chair', name:'Morning Chair Routine', cat:'chair', kind:'gentle',
+  blurb:'Wake up the whole body without leaving your seat.',
+  sessions:[
+   {name:'Legs wake-up', ex:['seated-marching','seated-heel-toe-raises','seated-knee-extension','ankle-circles','deep-breathing']},
+   {name:'Arms & shoulders', ex:['seated-marching','overhead-arm-raise','seated-bicep-curl','nia-shoulder-arm-stretch','neck-side-stretch','deep-breathing']},
+   {name:'Twist & reach', ex:['seated-marching','seated-torso-twist','overhead-arm-raise','seated-hamstring-stretch','nia-ankle-stretch','deep-breathing']},
+   {name:'Hips & knees', ex:['seated-hip-mobility','seated-knee-extension','seated-heel-toe-raises','deep-breathing']}
+  ]},
+ {id:'unwind', name:'Stretch & Unwind', cat:'stretch', kind:'gentle',
+  blurb:'Loosen up stiff spots. A good easy day.',
+  sessions:[
+   {name:'Neck & shoulders', ex:['neck-side-stretch','nia-shoulder-arm-stretch','chest-stretch','seated-torso-twist','deep-breathing']},
+   {name:'Hips & legs', ex:['seated-hamstring-stretch','calf-stretch-wall','nia-ankle-stretch','ankle-circles','deep-breathing']},
+   {name:'Head to toe', ex:['neck-side-stretch','chest-stretch','seated-torso-twist','seated-hamstring-stretch','nia-ankle-stretch','deep-breathing']}
+  ]},
+ {id:'taichi-seated', name:'Tai Chi, Sitting Down', cat:'taichi', kind:'gentle',
+  blurb:'Slow, flowing tai chi from your chair. Good for low-energy days.',
+  sessions:[
+   {name:'Seated tai chi', ex:['seated-tai-chi','deep-breathing']},
+   {name:'Seated qigong', ex:['seated-qigong','neck-side-stretch','deep-breathing']}
+  ]},
+ {id:'hands-feet', name:'Hands & Feet', cat:'mobility', kind:'gentle',
+  blurb:'For stiff fingers and ankles. Easy to do while watching TV.',
+  sessions:[
+   {name:'Hands first', ex:['hand-grip','hand-finger-stretches','ankle-circles','seated-heel-toe-raises']},
+   {name:'Feet first', ex:['ankle-circles','nia-ankle-stretch','seated-heel-toe-raises','hand-finger-stretches','hand-grip']}
+  ]},
+ {id:'getup', name:'Getting Up Safely', cat:'mobility', kind:'gentle', helper:true,
+  blurb:'Practice how to get up from the floor, with someone nearby. Worth doing once a month.',
+  sessions:[ {name:'Practice with a helper', ex:['getting-up-from-floor']} ]}
 ];
 const PM = Object.fromEntries(PROGRAMS.map(p => [p.id, p]));
-// Sunday..Saturday
-const WEEK_PLAN = ['taichi-seated','morning-chair','steady','taichi-first','stronger','unwind','hands-feet'];
+// Strength twice, balance three times, an easy day on Sunday (CDC / WHO guidance for older adults)
+const WEEK_PLAN = ['unwind','stronger','steady','taichi-first','stronger','morning-chair','steady']; // Sun..Sat
+const GENTLER = ['taichi-seated','hands-feet','unwind'];
+const KIND_LABEL = {strength:'Strength', balance:'Balance', gentle:'Gentle'};
 
 /* ---------- Storage ---------- */
 const KEY = 'willow.v1';
-const DEF = {favs:[], log:[], size:'medium', theme:'auto', welcomed:false, seatedOnly:false};
-let S = (() => { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch { return Object.assign({}, DEF); } })();
+const DEF = {favs:[], log:[], size:'medium', theme:'auto', welcomed:false, seatedOnly:false, progress:{}, swap:null, active:null,
+             sound:true, autoRead:false, rest:20, wake:true, installHidden:false, remind:'09:00'};
+let S = (() => {
+  let raw = {};
+  try { raw = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch { raw = {}; }
+  const s = Object.assign({}, DEF, raw);
+  // Defend against damaged or old saves
+  if (!Array.isArray(s.favs)) s.favs = [];
+  s.favs = s.favs.filter(id => typeof id === 'string');
+  if (!Array.isArray(s.log)) s.log = [];
+  s.log = s.log.filter(l => l && typeof l.date === 'string');
+  if (!s.progress || typeof s.progress !== 'object') s.progress = {};
+  if (s.size === 'normal') s.size = 'medium';
+  if (!['standard','medium','large','xlarge','largest'].includes(s.size)) s.size = 'medium';
+  if (!['auto','light','dark'].includes(s.theme)) s.theme = 'auto';
+  if (![0,15,20,30,60].includes(s.rest)) s.rest = 20;
+  if (s.active && (typeof s.active !== 'object' || !s.active.prog)) s.active = null;
+  return s;
+})();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
-// key, label, note, px
-const SIZES = [
-  ['standard','Standard','Like most phone apps',16],
-  ['medium','Medium','A little bigger (default)',18],
-  ['large','Large','Easier to read',21],
-  ['xlarge','Extra large','Big and clear',24],
-  ['largest','Largest','Biggest text',27]
-];
-// Move older saved sizes onto the new scale
-if (S.size === 'normal') S.size = 'medium';
-if (!SIZES.some(s => s[0] === S.size)) S.size = 'medium';
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
 
+const SIZES = [['standard','Standard','Like most phone apps',16],['medium','Medium','A little bigger (the usual)',18],
+  ['large','Large','Easier to read',21],['xlarge','Extra large','Big and clear',24],['largest','Largest','Biggest text',27]];
+const darkNow = () => S.theme === 'dark' || (S.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
 function applyPrefs(){
   const r = document.documentElement;
   if (S.size === 'medium') r.removeAttribute('data-size'); else r.setAttribute('data-size', S.size);
   if (S.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', S.theme);
+  let m = document.querySelector('meta[name="theme-color"]');
+  if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+  m.content = darkNow() ? '#121813' : '#f1f3ec';
+  const tb = document.getElementById('theme-btn');
+  if (tb) { tb.innerHTML = ico(darkNow() ? 'sun' : 'moon'); tb.setAttribute('aria-label', darkNow() ? 'Switch to light colors' : 'Switch to dark colors'); }
 }
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyPrefs); } catch {}
 
 /* ---------- Helpers ---------- */
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DOWF = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const progMins = p => Math.max(5, Math.round(p.ex.reduce((a, id) => a + EXM[id].secs + 20, 0) / 60));
-const progLevel = p => p.ex.some(id => EXM[id].level === 'moderate') ? 'Some standing work' : 'Gentle';
-const progSeated = p => p.ex.every(id => EXM[id].position === 'seated');
-const ytWatch = v => `https://www.youtube.com/watch?v=${v.id}${v.start ? '&t=' + v.start + 's' : ''}`;
-const ytEmbed = v => `https://www.youtube-nocookie.com/embed/${v.id}?rel=0&playsinline=1&modestbranding=1${v.start ? '&start=' + v.start : ''}`;
+const todayKey = () => ymd(new Date());
 const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 const catVar = c => `--cc:var(--c-${c})`;
+const exSecs = id => { const h = HOW[id], e = EXM[id];
+  if (h.kind === 'reps') return 75; if (h.kind === 'hold') return h.hold * h.rounds + 15 * h.rounds; if (h.kind === 'time') return h.secs; return e.secs; };
+const sessMins = (ex) => Math.max(5, Math.round(ex.reduce((a, id) => a + exSecs(id) + (S.rest || 0), 0) / 60));
+const allSeated = ex => ex.every(id => EXM[id].position === 'seated');
+const needsOf = ex => [...new Set(ex.flatMap(id => EX_NEEDS[id] || []))];
+const standsUp = ex => ex.some(id => EXM[id].position !== 'seated');
+const nextIdx = p => ((S.progress[p.id] || 0) % p.sessions.length + p.sessions.length) % p.sessions.length;
+const ytWatch = v => `https://www.youtube.com/watch?v=${v.id}${v.start ? '&t=' + v.start + 's' : ''}`;
+const ytEmbed = v => `https://www.youtube-nocookie.com/embed/${v.id}?rel=0&playsinline=1&modestbranding=1${v.start ? '&start=' + v.start : ''}`;
+function weekDays(){ const now = new Date(), st = new Date(now); st.setDate(now.getDate() - now.getDay());
+  return [...Array(7)].map((_, i) => { const d = new Date(st); d.setDate(st.getDate() + i); return d; }); }
+const daysDone = () => new Set(S.log.filter(l => l.kind !== 'walk').map(l => l.date));
+function toast(msg){ const t = document.getElementById('toast'); t.innerHTML = `<div class="toast">${esc(msg)}</div>`; clearTimeout(toast.t); toast.t = setTimeout(() => t.innerHTML = '', 3200); }
+function progByName(name){ return PROGRAMS.find(p => p.name === name); }
+function kindOfLog(l){ if (l.kind === 'walk') return 'walk'; const p = PM[l.prog] || progByName(l.name); return p ? p.kind : 'gentle'; }
 
-function weekDays(){
-  const now = new Date(); const start = new Date(now); start.setDate(now.getDate() - now.getDay());
-  return [...Array(7)].map((_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
-}
-const daysDone = () => new Set(S.log.map(l => l.date));
-
-/* ---------- Speech ---------- */
+/* ---------- Speech, chime, wake lock ---------- */
 const canSpeak = 'speechSynthesis' in window;
 let speaking = null;
-function speak(ex, btn){
+function say(text, id){
   if (!canSpeak) return;
-  try {
-    if (speaking === ex.id) { speechSynthesis.cancel(); speaking = null; refreshSpeakBtns(); return; }
-    speechSynthesis.cancel();
-    const text = `${ex.name}. ${ex.dose}. ${ex.steps.map((s, i) => `Step ${i+1}. ${s}`).join(' ')} Safety tip. ${ex.tip}`;
-    const u = new SpeechSynthesisUtterance(text); u.rate = .88;
-    u.onend = u.onerror = () => { speaking = null; refreshSpeakBtns(); };
-    speaking = ex.id; speechSynthesis.speak(u); refreshSpeakBtns();
-  } catch { speaking = null; }
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = .88;
+    u.onend = u.onerror = () => { speaking = null; refreshSpeakBtns(); }; speaking = id || 'x'; speechSynthesis.speak(u); refreshSpeakBtns(); } catch { speaking = null; }
 }
-function refreshSpeakBtns(){
-  document.querySelectorAll('[data-speak]').forEach(b => {
-    const on = speaking === b.dataset.speak;
-    b.innerHTML = `${ico(on ? 'stopS' : 'speak')}${on ? 'Stop reading' : 'Read aloud'}`;
-  });
-}
-
-/* ---------- Chime + wake lock ---------- */
+function stopSpeak(){ if (canSpeak) { try { speechSynthesis.cancel(); } catch {} } speaking = null; refreshSpeakBtns(); }
+const exText = e => `${e.name}. ${e.dose}. ${e.steps.map((s, i) => `Step ${i+1}. ${s}`).join(' ')} Safety tip. ${e.tip}`;
+function toggleRead(e){ if (speaking === e.id) stopSpeak(); else say(exText(e), e.id); }
+function refreshSpeakBtns(){ document.querySelectorAll('[data-speak]').forEach(b => { const on = speaking === b.dataset.speak;
+  b.innerHTML = `${ico(on ? 'stopS' : 'speak')}${on ? 'Stop reading' : 'Read aloud'}`; }); }
 let actx = null;
 function chime(){
-  try {
+  if (S.sound) try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    [523.25, 659.25, 783.99].forEach((f, i) => {
-      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * .18;
-      o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + .7);
-      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + .75);
-    });
+    [523.25, 659.25, 783.99].forEach((f, i) => { const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime + i * .18;
+      o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + .7);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + .75); });
   } catch {}
   try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch {}
 }
+function unlockAudio(){ try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume && actx.resume(); } catch {} }
 let wake = null;
-async function keepAwake(on){
-  try {
-    if (on && 'wakeLock' in navigator) { wake = await navigator.wakeLock.request('screen'); }
-    else if (!on && wake) { await wake.release(); wake = null; }
-  } catch { wake = null; }
-}
+async function keepAwake(on){ try { if (on && S.wake && 'wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); else if (!on && wake) { await wake.release(); wake = null; } } catch { wake = null; } }
 
-/* ---------- Router ---------- */
-let tab = 'today';
-let view = null; // {type:'program'|'exercise', id}
-let exFilter = 'all';
-const main = document.getElementById('main');
-const tabsEl = document.getElementById('tabs');
-const overlay = document.getElementById('overlay');
+/* ---------- Navigation (works with the phone's Back gesture) ---------- */
+// A view is {tab, page?, id?}. Pages: program, exercise, settings, help, feedback, walk
+let V = {tab:'today'};
+let F = null;            // the routine in progress
+let T = null;            // tour
+const main = document.getElementById('main'), tabsEl = document.getElementById('tabs'), overlay = document.getElementById('overlay'), tourEl = document.getElementById('tour');
 const TABS = [['today','Today','today'],['programs','Programs','programs'],['exercises','Exercises','exercises'],['week','My Week','week']];
+let ignorePop = 0;
+function hpush(state){ try { history.pushState(state, ''); } catch {} }
+function go(view, opts = {}){
+  stopSpeak();
+  V = view;
+  if (!opts.noPush) hpush({v: view});
+  render({focus: true, top: !opts.keepScroll});
+}
+function goBack(){ try { history.back(); } catch { go({tab: V.tab}); } }
+window.addEventListener('popstate', ev => {
+  if (ignorePop) { ignorePop--; return; }
+  if (T) { endTour(true); return; }
+  if (overlay.querySelector('.sheet-wrap')) { closeSheet(true); return; }
+  if (F) { // Back gesture during a routine: ask first instead of leaving
+    hpush({fa: true});
+    if (F.phase === 'finished') { closeFA(true); return; }
+    F.confirm = true; renderFA(); return;
+  }
+  const st = ev.state;
+  V = (st && st.v) || {tab:'today'};
+  stopSpeak(); render({focus: true, top: true});
+});
+try { history.replaceState({v: V}, ''); } catch {}
 
-function renderTabs(){
-  tabsEl.innerHTML = TABS.map(([k, l, ic]) => `<button class="tab${tab === k ? ' on' : ''}" data-tab="${k}" aria-current="${tab === k ? 'page' : 'false'}">${ico(ic)}${l}</button>`).join('');
-}
-function go(t, v=null){
-  tab = t; view = v;
-  if (canSpeak && speaking) { try { speechSynthesis.cancel(); } catch {} speaking = null; }
-  render(); window.scrollTo(0, 0);
-}
-function render(){
+function renderTabs(){ tabsEl.innerHTML = TABS.map(([k, l, ic]) => `<button class="tab${V.tab === k && !V.page ? ' on' : V.tab === k ? ' on' : ''}" data-tab="${k}" aria-current="${V.tab === k ? 'page' : 'false'}">${ico(ic)}${l}</button>`).join(''); }
+function render(o = {}){
   renderTabs();
-  if (view && view.type === 'program') main.innerHTML = programView(PM[view.id]);
-  else if (view && view.type === 'exercise') main.innerHTML = exerciseView(EXM[view.id]);
-  else main.innerHTML = ({today:todayView, programs:programsView, exercises:exercisesView, week:weekView})[tab]();
+  const page = V.page;
+  let html;
+  if (page === 'program') html = programView(PM[V.id] || myFavs());
+  else if (page === 'exercise') html = exerciseView(EXM[V.id]);
+  else if (page === 'settings') html = settingsView();
+  else if (page === 'help') html = helpView();
+  else if (page === 'feedback') html = feedbackView();
+  else if (page === 'walk') html = walkView();
+  else html = ({today: todayView, programs: programsView, exercises: exercisesView, week: weekView})[V.tab]();
+  main.innerHTML = html + pageFoot();
+  if (o.top) window.scrollTo(0, 0);
+  if (o.focus) { const h = main.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); try { h.focus({preventScroll: true}); } catch {} } }
+  if (page === 'help' && V.id) { const el = document.getElementById(V.id); if (el) el.scrollIntoView(); }
 }
 
-/* ---------- Views ---------- */
-function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
+/* ---------- Footer on every page ---------- */
+function pageFoot(){
+  return `<footer class="pfoot" aria-label="Help and settings">
+    <h2>Need a hand?</h2>
+    <div class="pfoot-grid">
+      <button class="btn" data-go="settings">${ico('gear')}Settings</button>
+      <button class="btn" data-go="help">${ico('help')}Help</button>
+      <button class="btn" data-tour>${ico('tour')}Take the tour</button>
+      <button class="btn" data-go="feedback">${ico('chat')}Send feedback</button>
+    </div>
+    <p class="note">Willow keeps your history on this phone only.</p>
+  </footer>`;
+}
 
+/* ---------- Today ---------- */
+function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
+const standalone = () => { try { return navigator.standalone || matchMedia('(display-mode: standalone)').matches; } catch { return false; } };
+function todaysProgram(){
+  if (S.swap && S.swap.date === todayKey() && PM[S.swap.prog]) return {p: PM[S.swap.prog], swapped: true};
+  return {p: PM[WEEK_PLAN[new Date().getDay()]], swapped: false};
+}
 function welcomeCard(){
   if (S.welcomed) return '';
-  return `<div class="card stack" style="margin-bottom:18px">
+  return `<section class="card stack" style="margin-bottom:18px" aria-label="Welcome">
     <h2 style="font-size:1.3rem">Welcome to Willow</h2>
-    <p>Each day there's a short routine ready for you. Tap <b>Start</b> and the app walks you through one exercise at a time, with a video and a timer.</p>
+    <p>Each day a short routine is ready below. Tap <b>Start</b> and Willow walks you through one exercise at a time, with a video.</p>
     <div class="tip">${ico('shield')}<div><b>Before you begin</b>Check with your doctor before starting a new exercise routine. Stop if you feel pain, dizziness, chest pain or shortness of breath.</div></div>
-    <button class="btn primary wide" data-tour>${ico('play')}Show me around</button>
-    <button class="btn quiet wide small" data-act="welcomed">Skip the tour</button>
+    <div class="act-row"><button class="btn small" data-act="welcomed">Got it</button><button class="btn small" data-tour>${ico('tour')}Show me around</button></div>
+  </section>`;
+}
+function installBanner(){
+  if (!EMBED || standalone() || S.installHidden) return '';
+  return `<section class="banner" aria-label="Put Willow on your home screen">
+    <b style="font-size:1.1rem">Put Willow on your home screen</b>
+    <span>It opens like a regular app, and your history stays safe.</span>
+    <div class="row2"><button class="btn small primary" data-go="help" data-id="install">Show me how</button><button class="btn small" data-act="hide-install">Not now</button></div>
+  </section>`;
+}
+function resumeCard(){
+  const a = S.active; if (!a || a.date !== todayKey()) return '';
+  const p = PM[a.prog]; if (!p) return '';
+  const s = p.sessions[a.sess] || p.sessions[0];
+  return `<section class="card stack" style="margin-bottom:18px;border:2px solid var(--accent)">
+    <span class="eyebrow">You stopped partway</span>
+    <h2 style="font-size:1.3rem">${esc(p.name)}: ${esc(s.name)}</h2>
+    <p class="muted">You were on exercise ${a.i + 1} of ${s.ex.length}.</p>
+    <button class="btn primary wide" data-act="resume">${ico('play')}Pick up where I left off</button>
+    <button class="btn link" data-act="drop-resume">Start fresh instead</button>
+  </section>`;
+}
+function todayView(){
+  const d = new Date();
+  const {p, swapped} = todaysProgram();
+  const si = nextIdx(p), s = p.sessions[si];
+  const doneToday = S.log.some(l => l.date === todayKey() && l.kind !== 'walk');
+  const last = [...S.log].reverse().find(l => l.prog === p.id && l.feel);
+  const feelNote = last && last.feel === 'hard' ? `<div class="tip">${ico('leaf')}<div><b>Last time this felt hard</b>Go slower, do fewer, or try something gentler today. Every bit counts.</div></div>`
+    : last && last.feel === 'easy' ? `<div class="tip">${ico('leaf')}<div><b>Last time this felt easy</b>Try a few more reps, or hold a little longer.</div></div>` : '';
+  const needs = needsOf(s.ex);
+  const others = PROGRAMS.filter(x => x.id !== p.id && x.id !== 'getup');
+  const off = (Math.floor(Date.now() / 864e5)) % others.length;
+  const pick = [0, 1, 2].map(k => others[(off + k) % others.length]);
+  return `${resumeCard()}
+  <h1 class="hello">${greeting()}</h1>
+  <p class="date">${DOWF[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}</p>
+  <section class="today-card" style="${catVar(p.cat)}" aria-label="Today's routine">
+    <span class="eyebrow">${doneToday ? 'Done for today. Want more?' : swapped ? 'Your gentler choice today' : "Today's routine"}</span>
+    <h2>${esc(p.name)}</h2>
+    <p class="sess">${esc(s.name)}${p.sessions.length > 1 ? ` · part ${si + 1} of ${p.sessions.length}` : ''}</p>
+    <div class="prog-meta"><span class="tag">About ${sessMins(s.ex)} min</span><span class="tag">${allSeated(s.ex) ? 'All seated' : 'Some standing'}</span><span class="tag">${KIND_LABEL[p.kind]}</span></div>
+    ${feelNote}
+    <button class="btn primary wide" data-start="${p.id}" data-sess="${si}">${ico('play')}Start</button>
+    <ul class="ex-mini" aria-label="In this routine">${s.ex.map(id => `<li>${esc(EXM[id].name)}</li>`).join('')}</ul>
+    ${needs.length ? `<p class="needs">${ico('needs')}<span>You'll need: ${needs.map(n => NEEDS[n].toLowerCase()).join(', ')}.</span></p>` : ''}
+    <div class="act-row">
+      <button class="btn small" data-open-program="${p.id}">See the exercises</button>
+      ${swapped ? `<button class="btn small" data-act="unswap">Back to today's plan</button>` : `<button class="btn small" data-act="gentler">Something gentler</button>`}
+    </div>
+  </section>
+  ${welcomeCard() ? '<div style="margin-top:18px">' + welcomeCard() + '</div>' : ''}${installBanner() ? '<div style="margin-top:18px">' + installBanner() + '</div>' : ''}
+  <h2 class="sec-h">This week</h2>
+  <div class="card">${weekStrip()}${mixSummary()}</div>
+  <h2 class="sec-h">Or try something else</h2>
+  <div class="stack">${pick.map(progCard).join('')}</div>`;
+}
+function weekStrip(){
+  const done = daysDone(), today = todayKey(), days = weekDays();
+  const n = days.filter(x => done.has(ymd(x))).length;
+  const big = ['xlarge','largest'].includes(S.size);
+  const note = n === 0 ? 'A fresh week. Any little bit counts.' : n === 1 ? 'You moved on 1 day this week. Nice start.' : `You moved on ${n} days this week. Lovely.`;
+  return `<div class="week" role="list" aria-label="This week">${days.map(x => { const k = ymd(x), hit = done.has(k);
+    return `<div class="wd${hit ? ' hit' : ''}${k === today ? ' now' : ''}" role="listitem" aria-label="${DOWF[x.getDay()]}${k === today ? ', today' : ''}${hit ? ', exercised' : ''}">${big ? DOW[x.getDay()][0] : DOW[x.getDay()]}<i>${hit ? ico('leaf') : ''}</i></div>`; }).join('')}</div>
+  <p class="week-note">${note}</p>`;
+}
+function weekCounts(){
+  const days = new Set(weekDays().map(ymd)); const c = {strength: new Set(), balance: new Set()}; let walk = 0;
+  S.log.forEach(l => { if (!days.has(l.date)) return; const k = kindOfLog(l);
+    if (k === 'walk') walk += l.mins || 0; else if (c[k]) c[k].add(l.date); });
+  return {strength: c.strength.size, balance: c.balance.size, walk};
+}
+function mixSummary(){
+  const c = weekCounts();
+  const pips = (n, goal) => `<span class="pips" aria-hidden="true">${[...Array(goal)].map((_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
+  return `<div class="mix" aria-label="This week's mix">
+    <div class="mix-row"><b>Strength days</b>${pips(Math.min(c.strength, 2), 2)}<span class="s">${c.strength} of 2 this week</span></div>
+    <div class="mix-row"><b>Balance days</b>${pips(Math.min(c.balance, 3), 3)}<span class="s">${c.balance} of 3 this week</span></div>
+    <div class="mix-row"><b>Walking</b><span>${c.walk} min</span><span class="s">Log walks on the My Week page</span></div>
   </div>`;
 }
 
-function weekStrip(){
-  const done = daysDone(), today = ymd(new Date());
-  const days = weekDays();
-  const n = days.filter(d => done.has(ymd(d))).length;
-  const note = n === 0 ? 'A fresh week. Any little bit counts.' : n === 1 ? 'You moved on 1 day this week. Nice start.' : `You moved on ${n} days this week. Lovely.`;
-  return `<div class="week" role="list" aria-label="This week">${days.map(d => {
-    const k = ymd(d), hit = done.has(k);
-    return `<div class="wd${hit ? ' hit' : ''}${k === today ? ' now' : ''}" role="listitem" aria-label="${DOWF[d.getDay()]}${hit ? ', exercised' : ''}">${DOW[d.getDay()]}<i>${hit ? ico('leaf') : ''}</i></div>`;
-  }).join('')}</div><p class="week-note">${note}</p>`;
-}
-
-function todayView(){
-  const d = new Date();
-  const p = PM[WEEK_PLAN[d.getDay()]];
-  const doneToday = S.log.some(l => l.date === ymd(d));
-  const others = PROGRAMS.filter(x => x.id !== p.id).slice(0, 3);
-  return `${welcomeCard()}
-  <h1 class="hello">${greeting()}</h1>
-  <p class="date">${DOWF[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}</p>
-  <section class="today-card" style="${catVar(p.cat)}">
-    <span class="eyebrow">${doneToday ? 'Done for today. Want more?' : "Today's routine"}</span>
-    <h2>${esc(p.name)}</h2>
-    <div class="prog-meta"><span class="tag">About ${progMins(p)} min</span><span class="tag">${progSeated(p) ? 'All seated' : progLevel(p)}</span></div>
-    <ul class="ex-mini">${p.ex.map(id => `<li>${esc(EXM[id].name)}</li>`).join('')}</ul>
-    <button class="btn primary wide" data-start="${p.id}">${ico('play')}Start</button>
-    <button class="btn quiet wide small" data-open-program="${p.id}">See the exercises first</button>
-  </section>
-  <h2 class="sec-h">This week</h2>
-  ${weekStrip()}
-  <h2 class="sec-h">Or try something else</h2>
-  <div class="stack">${others.map(progCard).join('')}</div>`;
-}
-
+/* ---------- Programs ---------- */
 function progCard(p){
+  const si = nextIdx(p), s = p.sessions[si];
   return `<button class="p-card" style="${catVar(p.cat)}" data-open-program="${p.id}">
     <h3>${esc(p.name)}</h3>
     <span class="muted">${esc(p.blurb)}</span>
-    <div class="prog-meta"><span class="tag">${progMins(p)} min</span><span class="tag">${p.ex.length} exercises</span>${progSeated(p) ? '<span class="tag">All seated</span>' : ''}</div>
-    <span class="go">Open ${ico('chev')}</span>
+    <div class="prog-meta"><span class="tag">${KIND_LABEL[p.kind]}</span>${p.sessions.length > 1 ? `<span class="tag">${p.sessions.length} routines that take turns</span>` : ''}${p.sessions.every(x => allSeated(x.ex)) ? '<span class="tag">All seated</span>' : ''}</div>
+    <span class="go">Up next: ${esc(s.name)} ${ico('chev')}</span>
   </button>`;
 }
-
-function myRoutine(){
-  const favs = S.favs.filter(id => EXM[id]);
-  if (!favs.length) return null;
-  return {id:'mine', name:'My Favorites', cat:'stretch', blurb:'The exercises you saved with the heart button.', ex:favs};
-}
-
+function myFavs(){ const favs = S.favs.filter(id => EXM[id]); if (!favs.length) return null;
+  return {id:'mine', name:'My Favorites', cat:'stretch', kind:'gentle', blurb:'The exercises you saved with the heart button.', sessions:[{name:'My favorites', ex:favs}]}; }
+function getProgram(id){ return id === 'mine' ? myFavs() : PM[id]; }
 function programsView(){
-  const mine = myRoutine();
+  const mine = myFavs();
   return `<h1 class="page-h">Programs</h1>
-  <p class="lede">Short routines that walk you through each exercise.</p>
+  <p class="lede">Each program has a few routines that take turns, so it isn't the same every time.</p>
   <div class="stack">${PROGRAMS.map(progCard).join('')}</div>
   <h2 class="sec-h">My Favorites</h2>
   ${mine ? progCard(mine) : `<div class="card"><p class="muted">Tap the heart on any exercise to save it here. Your favorites become your own routine.</p></div>`}`;
 }
-
-function getProgram(id){ return id === 'mine' ? myRoutine() : PM[id]; }
-
 function programView(p){
   if (!p) return programsView();
+  const si = nextIdx(p);
+  const anyStand = p.sessions.some(s => standsUp(s.ex));
   return `<button class="back" data-back>${ico('back')}Back</button>
   <h1 class="d-title">${esc(p.name)}</h1>
   <p class="lede" style="margin-bottom:12px">${esc(p.blurb)}</p>
-  <div class="d-tags"><span class="tag">About ${progMins(p)} min</span><span class="tag">${progSeated(p) ? 'All seated' : progLevel(p)}</span></div>
-  <button class="btn primary wide" data-start="${p.id}">${ico('play')}Start</button>
+  <div class="d-tags"><span class="tag">${KIND_LABEL[p.kind]}</span>${p.sessions.length > 1 ? `<span class="tag">${p.sessions.length} routines that take turns</span>` : ''}</div>
+  ${anyStand || p.helper ? `<div class="tip" style="margin-bottom:14px">${ico('shield')}<div><b>Stay safe</b>${p.helper ? 'Only practice this with someone nearby.' : 'For standing moves, stand by a counter or sturdy chair you can hold.'}</div></div>` : ''}
+  <div class="stack">${p.sessions.map((s, i) => `
+    <section class="sess-card${i === si ? ' next' : ''}" style="${catVar(p.cat)}">
+      ${i === si ? '<span class="eyebrow">Up next</span>' : ''}
+      <h3>${esc(s.name)}</h3>
+      <p class="muted">About ${sessMins(s.ex)} min · ${allSeated(s.ex) ? 'all seated' : 'some standing'}</p>
+      <ol>${s.ex.map(id => `<li>${esc(EXM[id].name)}</li>`).join('')}</ol>
+      ${needsOf(s.ex).length ? `<p class="needs">${ico('needs')}<span>You'll need: ${needsOf(s.ex).map(n => NEEDS[n].toLowerCase()).join(', ')}.</span></p>` : ''}
+      <button class="btn ${i === si ? 'primary' : 'small'} wide" data-start="${p.id}" data-sess="${i}">${ico('play')}${i === si ? 'Start' : 'Start this one'}</button>
+    </section>`).join('')}</div>
   <h2 class="sec-h">The exercises</h2>
-  <div>${p.ex.map(id => exRow(EXM[id])).join('')}</div>`;
+  <div>${[...new Set(p.sessions.flatMap(s => s.ex))].map(id => exRow(EXM[id])).join('')}</div>`;
 }
-
 function exRow(e){
   const fav = S.favs.includes(e.id);
   return `<button class="ex-row" style="${catVar(e.category)}" data-open-ex="${e.id}">
     <span class="ex-ico">${ico(CATS[e.category].icon)}</span>
     <span class="txt"><span class="t">${esc(e.name)}</span><br><span class="s">${POS[e.position]} · ${esc(e.dose)}</span></span>
-    ${fav ? `<span class="fav" aria-label="Favorite">${ico('heartF')}</span>` : ''}
-    ${ico('chev', 'chev')}
+    ${fav ? `<span class="fav" aria-label="Favorite">${ico('heartF')}</span>` : ''}${ico('chev', 'chev')}
   </button>`;
 }
 
+/* ---------- Exercises ---------- */
+let exFilter = 'all';
 function exercisesView(){
   let list = EX.filter(e => exFilter === 'all' || (exFilter === 'fav' ? S.favs.includes(e.id) : e.category === exFilter));
   if (S.seatedOnly) list = list.filter(e => e.position === 'seated');
   const chips = [['all','All'], ...Object.entries(CATS).map(([k, c]) => [k, c.short]), ['fav','Favorites']];
   return `<h1 class="page-h">Exercises</h1>
   <p class="lede">${EX.length} exercises, each with a video from a trusted source.</p>
-  <div class="chips" role="tablist" aria-label="Type of exercise">${chips.map(([k, l]) => `<button class="chip${exFilter === k ? ' on' : ''}" role="tab" aria-selected="${exFilter === k}" data-filter="${k}">${l}</button>`).join('')}</div>
-  <div class="toggle-row"><span id="seated-lbl" style="font-weight:700">Only show seated</span><button class="switch" id="seated-switch" role="switch" aria-labelledby="seated-lbl" aria-checked="${S.seatedOnly}"></button></div>
+  <div class="chips" role="group" aria-label="Show">${chips.map(([k, l]) => `<button class="chip" aria-pressed="${exFilter === k}" data-filter="${k}">${l}</button>`).join('')}</div>
+  <button class="toggle-row" data-act="seated" aria-pressed="${S.seatedOnly}"><span>Only show seated<span class="d">Hide anything done standing</span></span><span class="switch${S.seatedOnly ? ' on' : ''}" aria-hidden="true">${S.seatedOnly ? 'On' : 'Off'}</span></button>
   <div>${list.length ? list.map(exRow).join('') : `<div class="empty">${exFilter === 'fav' ? 'No favorites yet. Tap the heart on any exercise to save it.' : 'Nothing here with that filter.'}</div>`}</div>`;
 }
-
 function videoBlock(e){
   const v = e.video;
-  if (EMBED) {
-    return `<div class="video"><iframe src="${ytEmbed(v)}" title="Video: ${esc(e.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-    <p class="vid-src">Video by ${esc(v.channel)}<a href="${ytWatch(v)}" target="_blank" rel="noopener">Open in YouTube</a></p>`;
-  }
-  return `<a class="watch" href="${ytWatch(v)}" target="_blank" rel="noopener">
-    <span class="play">${ico('play')}</span>
-    <span style="flex:1;min-width:0"><span class="t">Watch how</span><br><span class="s">Video by ${esc(v.channel)}. Opens YouTube.</span></span>
-    ${ico('ext', 'chev')}
-  </a>`;
+  if (EMBED) return `<div class="video"><iframe src="${ytEmbed(v)}" title="Video: ${esc(e.name)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <p class="vid-src">Video by ${esc(v.channel)}</p>
+    <a class="btn small wide vid-alt" href="${ytWatch(v)}" target="_blank" rel="noopener">${ico('ext')}Video not playing? Open it in YouTube</a>`;
+  return `<a class="watch" href="${ytWatch(v)}" target="_blank" rel="noopener"><span class="play">${ico('play')}</span>
+    <span style="flex:1;min-width:0"><span class="t">Watch how</span><br><span class="s">Video by ${esc(v.channel)}. Opens YouTube.</span></span>${ico('ext', 'chev')}</a>`;
 }
-
 function exerciseView(e){
   if (!e) return exercisesView();
   const fav = S.favs.includes(e.id);
@@ -588,330 +852,474 @@ function exerciseView(e){
   <h1 class="d-title">${esc(e.name)}</h1>
   <div class="d-tags"><span class="tag cat" style="${catVar(e.category)}">${ico(CATS[e.category].icon)}${CATS[e.category].name}</span><span class="tag">${POS[e.position]}</span>${e.level === 'moderate' ? '<span class="tag">A bit harder</span>' : ''}</div>
   <p class="dose">${esc(e.dose)}</p>
+  <button class="btn primary wide" style="margin-bottom:16px" data-start-ex="${e.id}">${ico('play')}Do this one now</button>
   <div class="stack" style="gap:16px">
     <div>${videoBlock(e)}</div>
+    <h2 style="font-size:1.2rem">How to do it</h2>
     <ol class="steps">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+    ${EASIER[e.id] ? `<p class="easier"><span><b>Easier version:</b> ${esc(EASIER[e.id])}</span></p>` : ''}
     <div class="tip">${ico('shield')}<div><b>Safety tip</b>${esc(e.tip)}</div></div>
-  </div>
-  <div class="act-row">
-    ${canSpeak ? `<button class="btn small" data-speak="${e.id}">${ico(speaking === e.id ? 'stopS' : 'speak')}${speaking === e.id ? 'Stop reading' : 'Read aloud'}</button>` : ''}
-    <button class="btn small" data-fav="${e.id}" aria-pressed="${fav}">${ico(fav ? 'heartF' : 'heart')}${fav ? 'Saved' : 'Save'}</button>
-  </div>
-  <button class="btn primary wide" style="margin-top:12px" data-start-ex="${e.id}">${ico('play')}Do this one now</button>`;
+    <div class="act-row">
+      ${canSpeak ? `<button class="btn small" data-speak="${e.id}">${ico(speaking === e.id ? 'stopS' : 'speak')}${speaking === e.id ? 'Stop reading' : 'Read aloud'}</button>` : ''}
+      <button class="btn small" data-fav="${e.id}" aria-pressed="${fav}">${ico(fav ? 'heartF' : 'heart')}${fav ? 'Saved' : 'Save'}</button>
+    </div>
+  </div>`;
 }
 
+/* ---------- My Week ---------- */
 function weekView(){
-  const recent = [...S.log].reverse().slice(0, 12);
-  const feelTxt = {easy:'Felt easy', right:'Felt just right', hard:'Felt too hard'};
+  const recent = [...S.log].reverse().slice(0, 14);
+  const feelTxt = {easy:'Felt easy', right:'Felt just right', hard:'Felt hard'};
   return `<h1 class="page-h">My Week</h1>
   <p class="lede">Every bit of movement counts.</p>
-  <div class="card">${weekStrip()}</div>
+  <div class="card">${weekStrip()}${mixSummary()}</div>
+  <div class="act-row" style="margin-top:12px">
+    <button class="btn small" data-go="walk">${ico('walk')}Log a walk</button>
+    <button class="btn small" data-act="share-week">${ico('share')}Share my week</button>
+  </div>
   <h2 class="sec-h">Recent</h2>
-  ${recent.length ? recent.map(l => { const d = new Date(l.date + 'T12:00'); return `<div class="log-item"><div class="date-chip"><span>${DOW[d.getDay()]}</span><b>${d.getDate()}</b></div><div><div class="t">${esc(l.name)}</div><div class="s">${l.count} exercise${l.count === 1 ? '' : 's'} · ${l.mins} min${l.feel ? ' · ' + feelTxt[l.feel] : ''}</div></div></div>`; }).join('') : `<div class="card"><p class="muted">Finished routines show up here.</p></div>`}
+  ${recent.length ? recent.map(l => { const d = new Date(l.date + 'T12:00');
+    const sub = l.kind === 'walk' ? `${l.mins} min` : `${l.count} exercise${l.count === 1 ? '' : 's'} · ${l.mins} min${l.feel ? ' · ' + feelTxt[l.feel] : ''}`;
+    return `<div class="log-item"><div class="date-chip"><span>${DOW[d.getDay()]}</span><b>${d.getDate()}</b></div><div style="min-width:0"><div class="t">${esc(l.name)}${l.sessName ? ': ' + esc(l.sessName) : ''}</div><div class="s">${sub}</div></div></div>`; }).join('')
+    : `<div class="card"><p class="muted">Finished routines and walks show up here.</p></div>`}`;
+}
+function walkView(){
+  return `<button class="back" data-back>${ico('back')}Back</button>
+  <h1 class="d-title">Log a walk</h1>
+  <p class="lede">Walking counts too. How long did you go?</p>
+  <div class="minutes" role="group" aria-label="Minutes">${[10, 15, 20, 30, 45, 60].map(m => `<button class="btn small" data-walk="${m}">${m} min</button>`).join('')}</div>
+  <p class="muted" style="margin-top:14px">Gardening, swimming or a class count too. Pick about how long it lasted.</p>`;
+}
+function shareText(){
+  const c = weekCounts(); const n = [...daysDone()].filter(d => weekDays().map(ymd).includes(d)).length;
+  return `My Willow week: I moved on ${n} day${n === 1 ? '' : 's'}. Strength ${c.strength} of 2, balance ${c.balance} of 3${c.walk ? `, and ${c.walk} minutes of walking` : ''}.`;
+}
 
-  <h2 class="sec-h">Settings</h2>
-  <div class="card set-group">
-    <span style="font-weight:700">Text size</span>
-    ${sizeOptions()}
-    <span style="font-weight:700;margin-top:8px">Colors</span>
-    <div class="seg" role="group" aria-label="Colors">${[['auto','Automatic'],['light','Light'],['dark','Dark']].map(([k, l]) => `<button class="${S.theme === k ? 'on' : ''}" data-theme-set="${k}" aria-pressed="${S.theme === k}">${l}</button>`).join('')}</div>
-  </div>
+/* ---------- Settings ---------- */
+let confirmClear = false, settingsMsg = '';
+function settingsView(){
+  const opt = (on, attrs, left, b, span) => `<button class="opt${on ? ' on' : ''}" ${attrs} aria-pressed="${on}">${left}<span class="lbl"><b>${b}</b>${span ? `<span>${span}</span>` : ''}</span>${on ? ico('check', 'chk') : ''}</button>`;
+  const sw = (on, act, label, d) => `<button class="toggle-row" data-act="${act}" aria-pressed="${on}"><span>${label}${d ? `<span class="d">${d}</span>` : ''}</span><span class="switch${on ? ' on' : ''}" aria-hidden="true">${on ? 'On' : 'Off'}</span></button>`;
+  return `<button class="back" data-back>${ico('back')}Back</button>
+  <h1 class="d-title">Settings</h1>
+  <section class="set-block"><h2>Colors</h2><p class="hint">Light or dark, or follow your phone.</p>
+    <div class="opt-list">
+      ${opt(S.theme === 'light', 'data-theme-set="light"', `<span class="swatch" style="background:#f1f3ec;color:#1c2620">Aa</span>`, 'Light', 'Dark text on a light background')}
+      ${opt(S.theme === 'dark', 'data-theme-set="dark"', `<span class="swatch" style="background:#121813;color:#e7ede4">Aa</span>`, 'Dark', 'Light text on a dark background. Easier at night.')}
+      ${opt(S.theme === 'auto', 'data-theme-set="auto"', `<span class="swatch" style="background:linear-gradient(90deg,#f1f3ec 50%,#121813 50%);color:#777">Aa</span>`, 'Match my phone', 'Changes when your phone does')}
+    </div></section>
+  <section class="set-block"><h2>Text size</h2>
+    <div class="opt-list">${SIZES.map(([k, l, note, px]) => opt(S.size === k, `data-size="${k}"`, `<span class="sample" style="font-size:${Math.round(px * 1.3)}px">Aa</span>`, l, note)).join('')}</div></section>
+  <section class="set-block"><h2>During a routine</h2>
+    ${sw(S.sound, 'sound', 'Chime when time is up', 'A soft chime and a buzz')}
+    ${sw(S.autoRead, 'autoread', 'Read each exercise aloud', 'Willow reads the steps when each exercise starts')}
+    ${sw(S.wake, 'wake', 'Keep the screen on', 'So it doesn\'t go dark mid-exercise')}
+    <p style="font-weight:700;margin-top:6px">Rest between exercises</p>
+    <div class="opt-list">${[[0,'No rest screen'],[15,'15 seconds'],[20,'20 seconds'],[30,'30 seconds'],[60,'1 minute']].map(([v, l]) => opt(S.rest === v, `data-rest="${v}"`, '', l, '')).join('')}</div></section>
+  <section class="set-block"><h2>Daily reminder</h2>
+    <p class="hint">Adds a daily reminder to your phone's calendar.</p>
+    <label class="lbl" for="remind-time">Time</label>
+    <input class="field" type="time" id="remind-time" value="${esc(S.remind)}">
+    <button class="btn wide" data-act="remind">${ico('bell')}Add to my calendar</button>
+    ${EMBED ? '' : '<p class="hint">Works in the installed app.</p>'}</section>
+  <section class="set-block"><h2>Your history</h2>
+    <p class="hint">Willow keeps your history and settings on this phone only. Nothing is sent anywhere.</p>
+    ${confirmClear ? `<div class="inline-confirm"><b>Clear all your history?</b><span>Your settings stay. This can't be undone.</span><button class="btn small" data-act="clear-yes">Yes, clear it</button><button class="btn small primary" data-act="clear-no">Keep my history</button></div>`
+      : `<button class="btn wide" data-act="clear-ask">Clear my history</button>`}
+    ${settingsMsg ? `<p class="status" role="status">${esc(settingsMsg)}</p>` : ''}</section>
+  <p class="muted" style="margin-top:24px;font-size:.85rem">Willow ${VERSION}</p>`;
+}
 
-  <h2 class="sec-h">Help</h2>
-  <div class="card help">
-    <p><b>Doing a routine.</b> Tap <b>Start</b>. Willow shows one exercise at a time with a video, the steps and a timer. Tap the big green button to start the timer, and <b>Next</b> when you're ready to move on.</p>
-    <p><b>Too hard or too easy?</b> Do fewer reps, hold for less time, or stay seated. Use <b>Only show seated</b> on the Exercises page to see chair-only moves.</p>
-    <p><b>Put Willow on your home screen.</b></p>
-    <ol><li>Open Willow's link in Safari (iPhone) or Chrome (Android).</li><li>Tap the Share button, or the ⋮ menu on Android.</li><li>Tap <b>Add to Home Screen</b>.</li></ol>
-    <button class="btn wide" style="margin-top:14px" data-tour>${ico('play')}Take the tour again</button>
-  </div>
-  <div class="tip" style="margin-top:16px">${ico('shield')}<div><b>Stay safe</b>Check with your doctor before starting a new exercise routine. Stop and rest if you feel pain, dizziness, chest pain or shortness of breath.</div></div>
-  <p class="fine">Videos belong to their creators and play from YouTube. Willow keeps your history on this phone only.</p>`;
+/* ---------- Help ---------- */
+function helpView(){
+  return `<button class="back" data-back>${ico('back')}Back</button>
+  <h1 class="d-title">Help</h1>
+  <div class="act-row" style="margin-bottom:22px"><button class="btn small primary" data-tour>${ico('tour')}Take the tour</button><button class="btn small" data-go="feedback">${ico('chat')}Send feedback</button></div>
+  <section class="help-sec"><h2>Doing a routine</h2>
+    <ol><li>On <b>Today</b>, tap <b>Start</b>.</li><li>Willow shows what you'll need, then one exercise at a time.</li><li>Watch the video. Then use the big button at the bottom: <b>Start timer</b> for holds, or <b>I'm done</b> when you've finished your reps.</li><li>Rest, then tap <b>I'm ready</b> for the next one.</li></ol>
+    <p>Tap <b>End</b> anytime. What you did still counts, and you can pick up later the same day.</p></section>
+  <section class="help-sec"><h2>Why is it different each time?</h2>
+    <p>Each program has a few routines that take turns. Finish one and the next is lined up for next time.</p></section>
+  <section class="help-sec"><h2>Too hard or too easy?</h2>
+    <ul><li>Do fewer reps or hold for less time. Look for <b>Easier version</b> on an exercise.</li><li>On Today, tap <b>Something gentler</b> for a seated routine.</li><li>On the Exercises page, turn on <b>Only show seated</b>.</li></ul></section>
+  <section class="help-sec"><h2>Stay safe</h2>
+    <ul><li>Check with your doctor before starting a new exercise routine.</li><li>For standing moves, hold a counter or sturdy chair.</li><li>Stop and rest if anything hurts or you feel dizzy.</li><li><b>Call 911 for chest pain, trouble breathing, or a fall where you're hurt.</b></li></ul></section>
+  <section class="help-sec" id="install"><h2>Put Willow on your home screen</h2>
+    <p><b>iPhone:</b></p><ol><li>Open Willow's link in Safari.</li><li>Tap the Share button (a square with an arrow).</li><li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol>
+    <p><b>Android:</b></p><ol><li>Open Willow's link in Chrome.</li><li>Tap the ⋮ menu.</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b>.</li></ol></section>
+  <section class="help-sec"><h2>Videos not playing?</h2>
+    <p>Videos need the internet. Check your Wi-Fi, or tap <b>Open it in YouTube</b> under the video. The steps and timers work without internet.</p></section>
+  <section class="help-sec"><h2>Bigger words or darker colors?</h2>
+    <p>Tap <b>AA</b> at the top to change the text size, or the moon to switch to dark colors. Both are also in <b>Settings</b>.</p></section>`;
+}
+
+/* ---------- Feedback ---------- */
+let fb = {kind:'', text:'', msg:''};
+const FB_KINDS = [['love','I like it'],['confusing','Something is confusing'],['broken',"Something isn't working"],['idea','I have an idea']];
+function fbBody(){
+  const k = FB_KINDS.find(x => x[0] === fb.kind);
+  return `${k ? k[1] + '\n\n' : ''}${fb.text.trim()}\n\n— Sent from Willow ${VERSION} (${SIZES.find(s => s[0] === S.size)[1]} text, ${darkNow() ? 'dark' : 'light'} colors)`;
+}
+function feedbackView(){
+  const to = FEEDBACK.name ? esc(FEEDBACK.name) : 'the person who set up Willow';
+  const has = fb.text.trim() || fb.kind;
+  const sms = `sms:${FEEDBACK.phone}${/iPhone|iPad/.test(navigator.userAgent) ? '&' : '?'}body=${encodeURIComponent(fbBody())}`;
+  const mail = `mailto:${FEEDBACK.email}?subject=${encodeURIComponent('Willow feedback')}&body=${encodeURIComponent(fbBody())}`;
+  return `<button class="back" data-back>${ico('back')}Back</button>
+  <h1 class="d-title">Send feedback</h1>
+  <p class="lede">Tell ${to} what's working and what isn't. Short is fine.</p>
+  <div class="chips" role="group" aria-label="What kind">${FB_KINDS.map(([k, l]) => `<button class="chip" data-fb-kind="${k}" aria-pressed="${fb.kind === k}">${l}</button>`).join('')}</div>
+  <label class="lbl" for="fb-text" style="margin-top:12px">Your message</label>
+  <textarea class="field" id="fb-text" placeholder="For example: the videos are too small, or I liked today's routine.">${esc(fb.text)}</textarea>
+  <div class="stack" style="margin-top:14px">
+    <a class="btn primary wide${has ? '' : ' off'}" ${has ? `href="${esc(sms)}"` : 'aria-disabled="true"'} id="fb-sms">${ico('chat')}Send as a text message</a>
+    <a class="btn wide${has ? '' : ' off'}" ${has ? `href="${esc(mail)}"` : 'aria-disabled="true"'} id="fb-mail">${ico('mail')}Send as an email</a>
+    <button class="btn wide" data-act="fb-copy" ${has ? '' : 'disabled'}>${ico('copy')}Copy my message</button>
+    <p class="muted">Your messages or mail app opens with your note filled in${FEEDBACK.phone || FEEDBACK.email ? '' : '. Choose who to send it to'}, then press send.</p>
+    ${fb.msg ? `<p class="status" role="status">${esc(fb.msg)}</p>` : ''}
+  </div>`;
 }
 
 /* ---------- Text size sheet ---------- */
-function sizeOptions(){
-  return `<div class="sizes" role="radiogroup" aria-label="Text size">${SIZES.map(([k, l, note, px]) =>
-    `<button class="opt${S.size === k ? ' on' : ''}" role="radio" aria-checked="${S.size === k}" data-size="${k}"><span class="sample" style="font-size:${Math.round(px * 1.35)}px">Aa</span><span class="lbl"><b>${l}</b><span>${note}</span></span>${S.size === k ? ico('check', 'chev') : ''}</button>`
-  ).join('')}</div>`;
-}
 function sizeSheet(){
-  overlay.innerHTML = `<div class="sheet-wrap" data-close-sheet><div class="sheet" role="dialog" aria-modal="true" aria-label="Text size">
-    <h2>Text size</h2>
-    ${sizeOptions()}
-    <button class="btn primary wide" data-close-sheet>Done</button>
-  </div></div>`;
+  hpush({sheet: true});
+  overlay.innerHTML = `<div class="sheet-wrap" data-close-sheet><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sz-h">
+    <h2 id="sz-h">Text size</h2>
+    <div class="opt-list">${SIZES.map(([k, l, note, px]) => `<button class="opt${S.size === k ? ' on' : ''}" data-size="${k}" aria-pressed="${S.size === k}"><span class="sample" style="font-size:${Math.round(px * 1.3)}px">Aa</span><span class="lbl"><b>${l}</b><span>${note}</span></span>${S.size === k ? ico('check', 'chk') : ''}</button>`).join('')}</div>
+    <button class="btn primary wide" data-close-sheet>Done</button></div></div>`;
+  const on = overlay.querySelector('.opt.on'); if (on) on.focus();
 }
+function closeSheet(fromPop){ overlay.innerHTML = ''; if (!fromPop) { ignorePop++; goBackSilently(); } document.getElementById('size-btn').focus(); }
+function goBackSilently(){ try { history.back(); } catch { ignorePop = 0; } }
 
 /* ---------- Follow-along ---------- */
-let F = null; // {prog, i, left, total, running, start, done:[], confirm, finished, feel}
+// F = {prog, sess, ex[], i, phase:'ready'|'ex'|'rest'|'finished', began, t:{...timer}, confirm, feel, logIdx}
 let tick = null;
-
-function startSession(prog){
-  F = {prog, i:0, confirm:false, finished:false, feel:null, began:Date.now()};
-  loadStep(); keepAwake(true); renderFA();
+function startSession(prog, sessIdx, resumeAt){
+  if (!prog) return;
+  const s = prog.sessions[sessIdx] || prog.sessions[0];
+  unlockAudio();
+  F = {prog, sess: sessIdx, sessName: s.name, ex: s.ex, i: resumeAt || 0, phase: resumeAt ? 'ex' : 'ready', began: Date.now(), confirm: false};
+  if (prog.id !== 'mine' && prog.id !== 'single') { S.active = {prog: prog.id, sess: sessIdx, i: F.i, date: todayKey()}; save(); }
+  hpush({fa: true});
+  keepAwake(true); loadEx(); renderFA();
 }
-function loadStep(){
-  const e = EXM[F.prog.ex[F.i]];
-  F.total = e.secs; F.left = e.mode === 'timer' ? e.secs : 0; F.running = false; F.timeUp = false;
+function saveActive(){ if (S.active && F) { S.active.i = F.i; save(); } }
+function loadEx(){
   clearInterval(tick); tick = null;
+  const id = F.ex[F.i], h = HOW[id];
+  F.t = {kind: h.kind, round: 0, rounds: h.kind === 'hold' ? h.rounds : 1, total: h.kind === 'hold' ? h.hold : h.kind === 'time' ? h.secs : 0,
+         state: 'idle', endAt: 0, left: 0, sides: !!h.sides};
+  F.t.left = F.t.total;
 }
-function toggleTimer(){
-  const e = EXM[F.prog.ex[F.i]];
-  if (F.running) { F.running = false; clearInterval(tick); tick = null; updateTimer(); return; }
-  if (e.mode === 'timer' && F.left <= 0) F.left = F.total;
-  F.timeUp = false; F.running = true;
-  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume && actx.resume(); } catch {}
-  tick = setInterval(() => {
-    if (e.mode === 'timer') {
-      F.left -= 1;
-      if (F.left <= 0) { F.left = 0; F.running = false; F.timeUp = true; clearInterval(tick); tick = null; chime(); }
-    } else F.left += 1;
-    updateTimer();
-  }, 1000);
-  updateTimer();
+function restLoad(){ clearInterval(tick); tick = null; F.t = {kind:'rest', round:0, rounds:1, total:S.rest, state:'running', endAt: Date.now() + S.rest * 1000, left: S.rest}; startTick(); }
+function startTick(){ clearInterval(tick); tick = setInterval(onTick, 250); }
+function onTick(){
+  const t = F && F.t; if (!t || t.state !== 'running') return;
+  const left = Math.max(0, Math.ceil((t.endAt - Date.now()) / 1000));
+  if (left !== t.left) { t.left = left; updateTimer(); }
+  if (left <= 0) {
+    clearInterval(tick); tick = null; chime();
+    if (t.kind === 'rest') { t.state = 'done'; renderFA(); return; }
+    t.round++;
+    t.state = t.round >= t.rounds ? 'done' : 'between';
+    if (S.autoRead && canSpeak) say(t.state === 'done' ? 'Time is up.' : t.sides ? 'Switch sides.' : 'Rest a moment, then go again.');
+    renderFA();
+  }
 }
-function resetTimer(){ loadStep(); updateTimer(); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (F && F.phase !== 'finished') keepAwake(true); onTick(); } });
+function timerStart(){ const t = F.t; unlockAudio();
+  if (t.state === 'paused') { t.endAt = Date.now() + t.left * 1000; }
+  else { t.left = t.total; t.endAt = Date.now() + t.total * 1000; }
+  t.state = 'running'; startTick(); renderFA(); }
+function timerPause(){ const t = F.t; t.left = Math.max(0, Math.ceil((t.endAt - Date.now()) / 1000)); t.state = 'paused'; clearInterval(tick); tick = null; renderFA(); }
+function timerReset(){ loadEx(); renderFA(); }
 
-function timerHTML(e){
-  const C = 2 * Math.PI * 52;
-  const frac = e.mode === 'timer' ? F.left / F.total : Math.min(1, F.left / F.total);
-  const off = C * (1 - frac);
-  return `<div class="ring"><svg viewBox="0 0 120 120"><circle class="tr" cx="60" cy="60" r="52"/><circle class="pr" id="ring-pr" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg><div class="num" id="t-num" aria-live="off">${fmt(F.left)}</div></div>
-  <div class="timer-side">
-    <span class="${F.timeUp ? 'done-msg' : 'lbl'}" id="t-lbl" aria-live="polite">${F.timeUp ? 'Time! Tap Next when ready.' : e.mode === 'timer' ? (F.running ? 'Keep going…' : 'Timer') : (F.running ? 'Follow the video' : 'Time spent')}</span>
-    <button class="btn ${F.running ? '' : 'primary'} small" id="t-go" data-timer>${ico(F.running ? 'pause' : 'play')}${F.running ? 'Pause' : (F.left > 0 && F.left < F.total && e.mode === 'timer') || (e.mode === 'video' && F.left > 0) ? 'Resume' : 'Start timer'}</button>
-    ${(F.left !== (e.mode === 'timer' ? F.total : 0)) ? `<button class="btn quiet small" data-reset>${ico('restart')}Restart</button>` : ''}
-  </div>`;
+function ringHTML(t){
+  const C = 2 * Math.PI * 52, frac = t.total ? t.left / t.total : 0;
+  return `<div class="ring"><svg viewBox="0 0 120 120"><circle class="tr" cx="60" cy="60" r="52"/><circle class="pr" id="ring-pr" cx="60" cy="60" r="52" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - frac)}"/></svg><div class="num" id="t-num">${fmt(t.left)}</div></div>`;
 }
 function updateTimer(){
-  const e = EXM[F.prog.ex[F.i]];
-  const el = document.getElementById('timer');
-  if (el) el.innerHTML = timerHTML(e);
+  const t = F.t, n = document.getElementById('t-num'), pr = document.getElementById('ring-pr');
+  if (n) n.textContent = fmt(t.left);
+  if (pr) { const C = 2 * Math.PI * 52; pr.setAttribute('stroke-dashoffset', C * (1 - (t.total ? t.left / t.total : 0))); }
 }
-
+function holdLabel(t){
+  if (t.sides && t.rounds === 2) return t.round === 0 ? 'First side' : 'Other side';
+  return t.rounds > 1 ? `Hold ${Math.min(t.round + 1, t.rounds)} of ${t.rounds}` : 'Timer';
+}
+function exBody(e){
+  const t = F.t;
+  let action = '';
+  if (t.kind === 'reps') action = `<div class="reps-box"><span class="muted">Do</span><b>${esc(e.dose)}</b><span class="muted">Go at your own pace. Tap <b>I'm done</b> when you've finished.</span></div>`;
+  else if (t.kind === 'video') action = `<div class="reps-box"><b>Follow the video</b><span class="muted">Do as much as feels good. Tap <b>Next</b> when you're finished.</span></div>`;
+  else action = `<div class="timer" id="timer">${ringHTML(t)}<div class="timer-side">
+      <span class="${t.state === 'done' ? 'done-msg' : 'lbl'}" aria-live="polite">${t.state === 'done' ? 'Time is up. Nicely done.' : t.state === 'between' ? (t.sides ? 'Now switch sides.' : 'Rest a moment, then go again.') : t.kind === 'hold' ? holdLabel(t) : 'Timer'}</span>
+      <span class="sub">${t.kind === 'hold' ? `Hold for ${t.total} seconds${t.rounds > 1 ? (t.sides ? ', each side' : `, ${t.rounds} times`) : ''}` : `${fmt(t.total)} in all`}</span>
+      ${t.state !== 'idle' && t.state !== 'done' ? `<button class="btn link" data-act="t-reset">${ico('restart')}Start over</button>` : ''}
+    </div></div>`;
+  return `<div><span class="tag cat" style="${catVar(e.category)}">${ico(CATS[e.category].icon)}${POS[e.position]}</span>
+      <h1 class="d-title" style="margin-bottom:4px">${esc(e.name)}</h1><p class="dose" style="margin:0">${esc(e.dose)}</p></div>
+    ${action}
+    <div>${videoBlock(e)}</div>
+    <h2 style="font-size:1.2rem">How to do it</h2>
+    <ol class="steps">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+    ${EASIER[e.id] ? `<p class="easier"><span><b>Easier version:</b> ${esc(EASIER[e.id])}</span></p>` : ''}
+    <div class="tip">${ico('shield')}<div><b>Safety tip</b>${esc(e.tip)}</div></div>
+    ${canSpeak ? `<button class="btn small" data-speak="${e.id}">${ico(speaking === e.id ? 'stopS' : 'speak')}${speaking === e.id ? 'Stop reading' : 'Read aloud'}</button>` : ''}
+    <p class="stop-note">Stop and rest if anything hurts or you feel dizzy.</p>`;
+}
+function primaryFor(){
+  const t = F.t, last = F.i === F.ex.length - 1, nextLbl = last ? `${ico('check')}Finish` : `Next ${ico('next')}`;
+  if (t.kind === 'reps') return `<button class="btn primary" data-act="next">${last ? ico('check') + 'Finish' : `I'm done ${ico('next')}`}</button>`;
+  if (t.kind === 'video') return `<button class="btn primary" data-act="next">${nextLbl}</button>`;
+  if (t.state === 'idle') return `<button class="btn primary" data-act="t-start">${ico('play')}Start timer</button>`;
+  if (t.state === 'running') return `<button class="btn primary" data-act="t-pause">${ico('pause')}Pause</button>`;
+  if (t.state === 'paused') return `<button class="btn primary" data-act="t-start">${ico('play')}Keep going</button>`;
+  if (t.state === 'between') return `<button class="btn primary" data-act="t-start">${ico('play')}${t.sides ? 'Start other side' : 'Go again'}</button>`;
+  return `<button class="btn primary" data-act="next">${nextLbl}</button>`;
+}
 function renderFA(){
   if (!F) { overlay.innerHTML = ''; document.body.style.overflow = ''; return; }
   document.body.style.overflow = 'hidden';
-  const n = F.prog.ex.length;
-  if (F.finished) {
-    overlay.innerHTML = `<div class="fa"><div class="fa-body" style="padding-bottom:40px">
-      <div class="finish">
-        <div class="leaf">${ico('leaf')}</div>
-        <h2>Nice work today</h2>
-        <p class="muted">You finished ${esc(F.prog.name)}.</p>
-        <p style="font-weight:700;margin-top:10px">How did that feel?</p>
-        <div class="feel">${[['easy','Easy'],['right','Just right'],['hard','Too hard']].map(([k, l]) => `<button class="btn${F.feel === k ? ' on' : ''}" data-feel="${k}" aria-pressed="${F.feel === k}">${l}</button>`).join('')}</div>
-        ${F.feel === 'hard' ? `<div class="tip" style="text-align:left">${ico('shield')}<div><b>Next time</b>Try fewer reps, shorter holds, or the seated version. Rest as long as you need between exercises.</div></div>` : ''}
-        ${F.feel === 'easy' ? `<p class="muted">Next time you could add a few more reps, or try another routine afterward.</p>` : ''}
-        <button class="btn primary wide" data-close-fa>Done</button>
-      </div></div></div>`;
-    return;
+  const n = F.ex.length;
+  let top = '', body = '', foot = '';
+  const confirm = F.confirm ? `<div class="confirm" role="alertdialog" aria-labelledby="cf-h"><b id="cf-h" style="font-size:1.1rem">End this routine?</b><span class="muted">What you've done so far still counts. You can pick up later today.</span><button class="btn primary" data-act="keep">Keep going</button><button class="btn" data-act="confirm-end">End for now</button></div>` : '';
+  if (F.phase === 'ready') {
+    const needs = needsOf(F.ex), stand = standsUp(F.ex);
+    top = `<span class="count">${esc(F.prog.name)}</span><button class="btn small" data-act="end-now">${ico('close')}Close</button>`;
+    body = `<div class="center-page"><div class="leaf">${ico('leaf')}</div><h1 style="font-size:1.8rem">Get ready</h1>
+      <p class="muted">${esc(F.sessName)} · ${n} exercise${n === 1 ? '' : 's'} · about ${sessMins(F.ex)} min</p>
+      <div class="ready-list">
+        ${needs.length ? `<div class="card"><b>You'll need</b><ul style="margin:8px 0 0;padding-left:1.3rem">${needs.map(k => `<li>${esc(NEEDS[k])}</li>`).join('')}</ul></div>` : ''}
+        ${stand ? `<div class="tip">${ico('shield')}<div><b>For the standing moves</b>Stand by a counter or sturdy chair you can hold. It's good to have someone nearby.</div></div>` : ''}
+        <div class="tip">${ico('shield')}<div><b>Listen to your body</b>Stop if anything hurts or you feel dizzy. Call 911 for chest pain or trouble breathing.</div></div>
+      </div></div>`;
+    foot = `<div class="fa-foot-in one"><button class="btn primary" data-act="begin">${ico('play')}Let's begin</button></div>`;
+  } else if (F.phase === 'finished') {
+    const nextS = F.prog.sessions && F.prog.id !== 'mine' && F.prog.id !== 'single' ? F.prog.sessions[nextIdx(F.prog)] : null;
+    top = `<span class="count">All done</span>`;
+    body = `<div class="center-page"><div class="leaf">${ico('leaf')}</div><h1>Nice work today</h1>
+      <p class="muted">You finished ${esc(F.prog.name)}${F.sessName && F.prog.id !== 'single' ? ': ' + esc(F.sessName) : ''}.</p>
+      ${nextS && F.prog.sessions.length > 1 ? `<p>Next time: <b>${esc(nextS.name)}</b></p>` : ''}
+      <p style="font-weight:700;margin-top:10px">How did that feel?</p>
+      <div class="feel">${[['easy','Easy'],['right','Just right'],['hard','Too hard']].map(([k, l]) => `<button class="btn" data-feel="${k}" aria-pressed="${F.feel === k}">${l}</button>`).join('')}</div>
+      ${F.feel === 'hard' ? `<div class="tip" style="text-align:left">${ico('leaf')}<div><b>Next time</b>Try the easier versions, do fewer reps, or tap <b>Something gentler</b> on Today. Rest as long as you need.</div></div>` : ''}
+      ${F.feel === 'easy' ? `<p class="muted">Next time, try a few more reps or hold a little longer.</p>` : ''}</div>`;
+    foot = `<div class="fa-foot-in one"><button class="btn primary" data-act="close-fa">Done</button></div>`;
+  } else if (F.phase === 'rest') {
+    const nx = EXM[F.ex[F.i]], t = F.t;
+    top = `<span class="count">Rest · next is ${F.i + 1} of ${n}</span><button class="btn small" data-act="end">${ico('close')}End</button>`;
+    body = `${confirm}<div class="center-page"><h1 style="font-size:1.8rem">Rest</h1>
+      <div class="timer" id="timer" style="width:100%">${ringHTML(t)}<div class="timer-side"><span class="${t.state === 'done' ? 'done-msg' : 'lbl'}">${t.state === 'done' ? 'Ready when you are.' : 'Catch your breath.'}</span><span class="sub">Have a sip of water.</span></div></div>
+      <div class="card" style="width:100%;text-align:left"><span class="eyebrow">Up next</span><h2 style="font-size:1.3rem;margin-top:6px">${esc(nx.name)}</h2><p class="muted">${POS[nx.position]} · ${esc(nx.dose)}</p></div></div>`;
+    foot = `<div class="fa-foot-in"><button class="btn" data-act="prev">${ico('back')}Back</button><button class="btn primary" data-act="ready">I'm ready ${ico('next')}</button></div>`;
+  } else {
+    const e = EXM[F.ex[F.i]];
+    top = `<span class="count">Exercise ${F.i + 1} of ${n}</span><button class="btn small" data-act="end">${ico('close')}End</button>`;
+    body = `${confirm}${exBody(e)}`;
+    foot = `<div class="fa-foot-in"><button class="btn" data-act="prev" ${F.i === 0 ? 'disabled' : ''}>${ico('back')}Back</button>${primaryFor()}</div>`;
   }
-  const e = EXM[F.prog.ex[F.i]];
-  const last = F.i === n - 1;
+  const pct = F.phase === 'finished' ? 100 : F.phase === 'ready' ? 0 : (F.i / n) * 100;
   overlay.innerHTML = `<div class="fa" role="dialog" aria-modal="true" aria-label="${esc(F.prog.name)}">
-    <div class="fa-top"><div class="fa-top-in">
-      <span class="count">${F.i + 1} of ${n}</span>
-      <button class="btn quiet small" data-end>${ico('close')}End</button>
-    </div><div class="bar"><div style="width:${(F.i / n) * 100}%"></div></div></div>
-    <div class="fa-body" style="${catVar(e.category)}">
-      ${F.confirm ? `<div class="confirm"><b style="font-size:1.1rem">End this routine?</b><span class="muted">What you've done so far still counts.</span><button class="btn primary" data-confirm-end>Yes, end and save</button><button class="btn" data-keep>Keep going</button></div>` : ''}
-      <div>
-        <span class="tag cat">${ico(CATS[e.category].icon)}${POS[e.position]}</span>
-        <h1 class="d-title" style="margin-bottom:4px">${esc(e.name)}</h1>
-        <p class="dose" style="margin:0">${esc(e.dose)}</p>
-      </div>
-      <div>${videoBlock(e)}</div>
-      <div class="timer" id="timer">${timerHTML(e)}</div>
-      <ol class="steps">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
-      <div class="tip">${ico('shield')}<div><b>Safety tip</b>${esc(e.tip)}</div></div>
-      ${canSpeak ? `<button class="btn small" data-speak="${e.id}">${ico(speaking === e.id ? 'stopS' : 'speak')}${speaking === e.id ? 'Stop reading' : 'Read aloud'}</button>` : ''}
-      <p class="stop-note">Stop and rest if anything hurts or you feel dizzy.</p>
-    </div>
-    <div class="fa-foot"><div class="fa-foot-in">
-      <button class="btn" data-prev ${F.i === 0 ? 'disabled style="opacity:.4"' : ''}>${ico('back')}Back</button>
-      <button class="btn primary" data-next>${last ? ico('check') + 'Finish' : 'Next ' + ico('next')}</button>
-    </div></div>
-  </div>`;
+    <div class="fa-top"><div class="fa-top-in">${top}</div><div class="bar"><div style="width:${pct}%"></div></div></div>
+    <div class="fa-body" style="${F.phase === 'ex' ? catVar(EXM[F.ex[F.i]].category) : ''}">${body}</div>
+    <div class="fa-foot">${foot}</div></div>`;
 }
-
+function faFocusTop(){ const fa = overlay.querySelector('.fa'); if (fa) fa.scrollTop = 0; const h = overlay.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); try { h.focus({preventScroll:true}); } catch {} } }
+function enterEx(i){
+  stopSpeak(); F.i = i; F.phase = 'ex'; F.confirm = false; loadEx(); saveActive(); renderFA(); faFocusTop();
+  if (S.autoRead && canSpeak) say(exText(EXM[F.ex[F.i]]), F.ex[F.i]);
+}
+function nextStep(){
+  stopSpeak(); F.confirm = false;
+  if (F.i >= F.ex.length - 1) return finish();
+  F.i++; saveActive();
+  if (S.rest > 0) { F.phase = 'rest'; restLoad(); renderFA(); faFocusTop(); }
+  else enterEx(F.i);
+}
 function logSession(count){
   const mins = Math.max(1, Math.round((Date.now() - F.began) / 60000));
-  S.log.push({date: ymd(new Date()), name: F.prog.name, count, mins, feel: null});
-  if (S.log.length > 400) S.log = S.log.slice(-400);
-  save(); F.logIdx = S.log.length - 1;
+  S.log.push({date: todayKey(), prog: F.prog.id, name: F.prog.name, sessName: F.prog.id === 'single' ? '' : F.sessName, count, mins, feel: null});
+  if (S.log.length > 500) S.log = S.log.slice(-500);
+  F.logIdx = S.log.length - 1;
 }
-function stepTo(i){
-  if (canSpeak && speaking) { try { speechSynthesis.cancel(); } catch {} speaking = null; }
-  F.i = i; loadStep(); renderFA();
-  const fa = overlay.querySelector('.fa'); if (fa) fa.scrollTop = 0;
+function finish(){
+  clearInterval(tick); tick = null;
+  logSession(F.ex.length);
+  if (PM[F.prog.id]) S.progress[F.prog.id] = (F.sess + 1) % F.prog.sessions.length;
+  if (S.swap && S.swap.date !== todayKey()) S.swap = null;
+  S.active = null; save();
+  F.phase = 'finished'; keepAwake(false); renderFA(); faFocusTop();
 }
-function closeFA(){
-  clearInterval(tick); tick = null; F = null; keepAwake(false);
-  if (canSpeak) { try { speechSynthesis.cancel(); } catch {} speaking = null; }
-  renderFA(); render();
+function closeFA(fromPop){
+  clearInterval(tick); tick = null; F = null; keepAwake(false); stopSpeak();
+  renderFA(); if (!fromPop) { ignorePop++; goBackSilently(); } render({top: true});
 }
 
 /* ---------- Events ---------- */
-document.addEventListener('click', ev => {
-  const t = ev.target.closest('button, [data-close-sheet]');
-  if (!t) return;
-  const d = t.dataset;
-  if (d.closeSheet !== undefined && (t.tagName === 'BUTTON' || ev.target === t)) { overlay.innerHTML = ''; if (F) renderFA(); return; }
-  if (d.tab) return go(d.tab);
-  if (d.back !== undefined) { return go(tab); }
-  if (d.openProgram) return go(tab, {type:'program', id:d.openProgram});
-  if (d.openEx) return go(tab, {type:'exercise', id:d.openEx});
-  if (d.start) { const p = getProgram(d.start); if (p) startSession(p); return; }
-  if (d.startEx) { const e = EXM[d.startEx]; startSession({id:'single', name:e.name, cat:e.category, ex:[e.id]}); return; }
-  if (d.filter) { exFilter = d.filter; return render(); }
-  if (t.id === 'seated-switch') { S.seatedOnly = !S.seatedOnly; save(); return render(); }
-  if (d.fav) { const i = S.favs.indexOf(d.fav); i < 0 ? S.favs.push(d.fav) : S.favs.splice(i, 1); save(); return render(); }
-  if (d.speak) { return speak(EXM[d.speak], t); }
-  if (d.act === 'welcomed') { S.welcomed = true; save(); return render(); }
-  if (d.tour !== undefined) { S.welcomed = true; save(); return startTour(); }
-  if (T) {
-    if (d.tourNext !== undefined) return tourStep(T.i + 1);
-    if (d.tourBack !== undefined) return tourStep(T.i - 1);
-    if (d.tourEnd !== undefined) return endTour();
+document.getElementById('size-btn').addEventListener('click', sizeSheet);
+document.getElementById('set-btn').innerHTML = ico('gear');
+document.getElementById('set-btn').addEventListener('click', () => go({tab: V.tab, page: 'settings'}));
+document.getElementById('theme-btn').addEventListener('click', () => { S.theme = darkNow() ? 'light' : 'dark'; save(); applyPrefs(); if (V.page === 'settings') render(); toast(darkNow() ? 'Dark colors on' : 'Light colors on'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (T) endTour(); else if (overlay.querySelector('.sheet-wrap')) closeSheet(); else if (F && F.phase !== 'finished') { F.confirm = true; renderFA(); } } });
+document.addEventListener('input', e => {
+  if (e.target.id === 'fb-text') { fb.text = e.target.value; const has = fb.text.trim() || fb.kind;
+    // update send links without re-rendering (keeps the keyboard open)
+    const sms = document.getElementById('fb-sms'), mail = document.getElementById('fb-mail'), copy = main.querySelector('[data-act="fb-copy"]');
+    const body = encodeURIComponent(fbBody());
+    if (has) { sms.href = `sms:${FEEDBACK.phone}${/iPhone|iPad/.test(navigator.userAgent) ? '&' : '?'}body=${body}`; mail.href = `mailto:${FEEDBACK.email}?subject=${encodeURIComponent('Willow feedback')}&body=${body}`; sms.removeAttribute('aria-disabled'); mail.removeAttribute('aria-disabled'); copy.disabled = false; }
   }
-  if (d.size) { S.size = d.size; save(); applyPrefs(); if (overlay.querySelector('.sheet')) sizeSheet(); return render(); }
-  if (d.themeSet) { S.theme = d.themeSet; save(); applyPrefs(); return render(); }
-  if (t.id === 'size-btn') return sizeSheet();
-  // follow-along
-  if (!F) return;
-  if (d.timer !== undefined) return toggleTimer();
-  if (d.reset !== undefined) return resetTimer();
-  if (d.next !== undefined) {
-    if (F.i < F.prog.ex.length - 1) return stepTo(F.i + 1);
-    clearInterval(tick); tick = null; logSession(F.prog.ex.length); F.finished = true; keepAwake(false); return renderFA();
-  }
-  if (d.prev !== undefined) { if (F.i > 0) stepTo(F.i - 1); return; }
-  if (d.end !== undefined) { F.confirm = true; renderFA(); overlay.querySelector('.fa').scrollTop = 0; return; }
-  if (d.keep !== undefined) { F.confirm = false; return renderFA(); }
-  if (d.confirmEnd !== undefined) {
-    if (F.i > 0 || F.left !== (EXM[F.prog.ex[F.i]].mode === 'timer' ? F.total : 0)) logSession(F.i + (F.timeUp ? 1 : 0) || 1);
-    return closeFA();
-  }
-  if (d.feel) { F.feel = d.feel; if (F.logIdx != null && S.log[F.logIdx]) { S.log[F.logIdx].feel = d.feel; save(); } return renderFA(); }
-  if (d.closeFa !== undefined) return closeFA();
+  if (e.target.id === 'remind-time') { S.remind = e.target.value || '09:00'; save(); }
 });
-document.addEventListener('visibilitychange', () => { if (F && !F.finished && document.visibilityState === 'visible') keepAwake(true); });
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('button, a[aria-disabled], [data-close-sheet]');
+  if (!t) return;
+  if (t.matches('a[aria-disabled="true"]')) { ev.preventDefault(); return; }
+  const d = t.dataset;
+  if (d.closeSheet !== undefined && (t.tagName === 'BUTTON' || ev.target === t)) return closeSheet();
+  // tour
+  if (T) { if (d.tourNext !== undefined) return tourStep(T.i + 1); if (d.tourBack !== undefined) return tourStep(T.i - 1); if (d.tourEnd !== undefined) return endTour(); return; }
+  if (d.tour !== undefined) { S.welcomed = true; save(); return startTour(); }
+  // follow-along
+  if (F) {
+    const a = d.act;
+    if (a === 'begin') return enterEx(F.i);
+    if (a === 't-start') return timerStart();
+    if (a === 't-pause') return timerPause();
+    if (a === 't-reset') return timerReset();
+    if (a === 'next') return nextStep();
+    if (a === 'ready') return enterEx(F.i);
+    if (a === 'prev') { if (F.phase === 'rest') return enterEx(F.i - 1); if (F.i > 0) return enterEx(F.i - 1); return; }
+    if (a === 'end') { F.confirm = true; renderFA(); faFocusTop(); return; }
+    if (a === 'keep') { F.confirm = false; return renderFA(); }
+    if (a === 'end-now') { if (S.active && S.active.i === 0) { S.active = null; save(); } return closeFA(); }
+    if (a === 'confirm-end') { const doneN = F.i + (F.t && F.t.state === 'done' ? 1 : 0); if (doneN > 0) { logSession(doneN); } save(); return closeFA(); }
+    if (d.feel) { F.feel = d.feel; if (F.logIdx != null && S.log[F.logIdx]) { S.log[F.logIdx].feel = d.feel; save(); } return renderFA(); }
+    if (a === 'close-fa') return closeFA();
+    if (d.speak) return toggleRead(EXM[d.speak]);
+    return;
+  }
+  if (d.tab) return go({tab: d.tab});
+  if (d.back !== undefined) return goBack();
+  if (d.go) return go({tab: V.tab, page: d.go, id: d.id});
+  if (d.openProgram) return go({tab: V.tab, page: 'program', id: d.openProgram});
+  if (d.openEx) return go({tab: V.tab, page: 'exercise', id: d.openEx});
+  if (d.start) { const p = getProgram(d.start); if (p) startSession(p, +d.sess || 0); return; }
+  if (d.startEx) { const e = EXM[d.startEx]; startSession({id:'single', name:e.name, cat:e.category, sessions:[{name:e.name, ex:[e.id]}]}, 0); return; }
+  if (d.filter) { exFilter = d.filter; return render(); }
+  if (d.fav) { const i = S.favs.indexOf(d.fav); i < 0 ? S.favs.push(d.fav) : S.favs.splice(i, 1); save(); toast(i < 0 ? 'Saved to favorites' : 'Removed from favorites'); return render(); }
+  if (d.speak) return toggleRead(EXM[d.speak]);
+  if (d.size) { S.size = d.size; save(); applyPrefs(); if (overlay.querySelector('.sheet')) { overlay.querySelectorAll('.opt').forEach(o => { const on = o.dataset.size === S.size; o.classList.toggle('on', on); o.setAttribute('aria-pressed', on); o.querySelector('.chk') && o.querySelector('.chk').remove(); if (on) o.insertAdjacentHTML('beforeend', ico('check', 'chk')); }); } return render({keepScroll: true}); }
+  if (d.themeSet) { S.theme = d.themeSet; save(); applyPrefs(); return render(); }
+  if (d.rest) { S.rest = +d.rest; save(); return render(); }
+  if (d.walk) { S.log.push({date: todayKey(), kind: 'walk', name: 'Walk', mins: +d.walk}); save(); toast(`${d.walk} minutes logged. Well done.`); return goBack(); }
+  if (d.fbKind) { fb.kind = fb.kind === d.fbKind ? '' : d.fbKind; return render({keepScroll: true}); }
+  const a = d.act;
+  if (a === 'welcomed') { S.welcomed = true; save(); return render(); }
+  if (a === 'hide-install') { S.installHidden = true; save(); return render(); }
+  if (a === 'seated') { S.seatedOnly = !S.seatedOnly; save(); return render({keepScroll: true}); }
+  if (a === 'gentler') { const cur = todaysProgram().p; const pick = GENTLER.find(id => id !== cur.id) || 'taichi-seated'; S.swap = {date: todayKey(), prog: pick}; save(); toast('Switched to something gentler'); return render(); }
+  if (a === 'unswap') { S.swap = null; save(); return render(); }
+  if (a === 'resume') { const r = S.active, p = PM[r.prog]; if (p) startSession(p, r.sess, r.i); return; }
+  if (a === 'drop-resume') { S.active = null; save(); return render(); }
+  if (a === 'sound') { S.sound = !S.sound; save(); if (S.sound) { unlockAudio(); chime(); } return render({keepScroll: true}); }
+  if (a === 'autoread') { S.autoRead = !S.autoRead; save(); return render({keepScroll: true}); }
+  if (a === 'wake') { S.wake = !S.wake; save(); return render({keepScroll: true}); }
+  if (a === 'clear-ask') { confirmClear = true; settingsMsg = ''; return render({keepScroll: true}); }
+  if (a === 'clear-no') { confirmClear = false; return render({keepScroll: true}); }
+  if (a === 'clear-yes') { S.log = []; S.progress = {}; S.active = null; confirmClear = false; settingsMsg = 'Your history is cleared.'; save(); return render({keepScroll: true}); }
+  if (a === 'remind') return addReminder();
+  if (a === 'share-week') return shareWeek();
+  if (a === 'fb-copy') return copyText(fbBody(), m => { fb.msg = m; render({keepScroll: true}); });
+});
+async function copyText(text, done){
+  try { await navigator.clipboard.writeText(text); done('Copied. Paste it into a text or email.'); }
+  catch { done('Copying is blocked here. Long-press the message box to copy it instead.'); }
+}
+async function shareWeek(){
+  const text = shareText();
+  try { if (navigator.share) { await navigator.share({text}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  const href = `sms:${FEEDBACK.phone}${/iPhone|iPad/.test(navigator.userAgent) ? '&' : '?'}body=${encodeURIComponent(text)}`;
+  const a = document.createElement('a'); a.href = href; a.click();
+  copyText(text, m => toast(m));
+}
+function addReminder(){
+  const [hh, mm] = (S.remind || '09:00').split(':').map(Number);
+  const d = new Date(); d.setHours(hh, mm, 0, 0);
+  const p2 = n => String(n).padStart(2, '0');
+  const dt = `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}T${p2(hh)}${p2(mm)}00`;
+  const end = `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}T${p2(hh)}${p2((mm + 15) % 60)}00`;
+  const url = EMBED ? location.href.split('#')[0] : '';
+  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Willow//EN','BEGIN:VEVENT',`UID:willow-${Date.now()}@willow`,`DTSTAMP:${dt}`,`DTSTART:${dt}`,`DTEND:${hh*60+mm+15 >= 1440 ? dt : end}`,
+    'RRULE:FREQ=DAILY','SUMMARY:Willow exercises',`DESCRIPTION:Time for today's Willow routine. ${url}`,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:Willow exercises','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  try {
+    const blob = new Blob([ics], {type: 'text/calendar'}); const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'willow-reminder.ics'; document.body.appendChild(a); a.click(); a.remove();
+    settingsMsg = 'Your phone should offer to add it to your calendar. Tap Add.';
+  } catch { settingsMsg = 'This phone could not make the reminder.'; }
+  render({keepScroll: true});
+}
 
 /* ---------- Tour ---------- */
-// sel: element to point at (null = centered card). tab: which tab to show first.
 const TOUR = [
   {sel:null, tab:'today', title:'Welcome to Willow', text:"Here's a quick look around. It takes about a minute. Tap <b>Next</b> to keep going, or <b>Close</b> anytime.", pic:'leaf'},
-  {sel:'.today-card', tab:'today', title:"Today's routine", text:'Each day a short routine is waiting here. Tap the green <b>Start</b> button and Willow walks you through it.'},
-  {sel:'.week', tab:'today', title:'Your week', text:'Each day you exercise, a leaf fills in. Any little bit counts.'},
-  {sel:'#size-btn', tab:'today', title:'Make the words bigger', text:'Tap these letters anytime to make the words larger or smaller.'},
-  {sel:'[data-tab="programs"]', tab:'programs', title:'Programs', text:'More routines to choose from: chair, balance, tai chi, stretching, and hands and feet.'},
-  {sel:'[data-tab="exercises"]', tab:'exercises', title:'Exercises', text:'Every exercise on its own, each with a video. Tap one to see how. Tap the <b>heart</b> to save your favorites.'},
-  {sel:'#seated-switch', tab:'exercises', title:'Only seated', text:'Turn this on to see only the exercises you can do sitting in a chair.'},
-  {sel:'[data-tab="week"]', tab:'week', title:'My Week', text:"See what you've done, change the text size and colors, and find help."},
-  {sel:null, tab:'today', title:'During a routine', text:'You see one exercise at a time.<ol class="tour-list"><li>Watch the video.</li><li>Tap <b>Start timer</b> and do the exercise.</li><li>Tap <b>Next</b> when you are ready.</li></ol>Tap <b>End</b> anytime. What you did still counts.', pic:'play'},
+  {sel:'.today-card', tab:'today', title:"Today's routine", text:'Each day a short routine is ready here. Tap the green <b>Start</b> button and Willow walks you through it.'},
+  {sel:'[data-act="gentler"]', tab:'today', title:'Not up to it today?', text:'Tap <b>Something gentler</b> for an easy seated routine instead.'},
+  {sel:'.week', tab:'today', title:'Your week', text:'Each day you move, a leaf fills in. Below it, you can see your strength and balance days.'},
+  {sel:'.hdr-in', tab:'today', title:'Bigger words, darker colors', text:'At the top: the <b>moon</b> switches to dark colors, <b>AA</b> changes the text size, and the <b>gear</b> opens Settings.'},
+  {sel:'[data-tab="programs"]', tab:'programs', title:'Programs', text:'More routines to choose from. Each one has a few versions that take turns, so it changes each time.'},
+  {sel:'[data-tab="exercises"]', tab:'exercises', title:'Exercises', text:'Every exercise on its own, each with a video. Tap the <b>heart</b> to save a favorite.'},
+  {sel:'[data-tab="week"]', tab:'week', title:'My Week', text:'See what you\'ve done, log a walk, or share your week with family.'},
+  {sel:'.pfoot', tab:'today', title:'Help is always at the bottom', text:'Scroll to the bottom of any page for <b>Settings</b>, <b>Help</b>, this <b>tour</b>, and <b>Send feedback</b>.'},
+  {sel:null, tab:'today', title:'During a routine', text:'You see one exercise at a time.<ol class="tour-list"><li>Watch the video.</li><li>Use the big button at the bottom: <b>Start timer</b> or <b>I\'m done</b>.</li><li>Rest, then tap <b>I\'m ready</b>.</li></ol>Tap <b>End</b> anytime. What you did still counts.', pic:'play'},
   {sel:null, tab:'today', title:"You're all set", text:'Check with your doctor before starting a new routine. Stop and rest if anything hurts or you feel dizzy.<br><br>Enjoy moving!', pic:'shield'}
 ];
-let T = null;
-const tourEl = document.createElement('div');
-tourEl.id = 'tour';
-document.body.appendChild(tourEl);
-
-function startTour(){
-  if (F) return;
-  overlay.innerHTML = '';
-  T = {i:0};
-  tab = 'today'; view = null; render();
-  tourStep(0);
-}
-function endTour(){
-  T = null; tourEl.innerHTML = '';
-  document.removeEventListener('keydown', tourKey);
-  go('today');
-}
-function tourKey(e){
-  if (!T) return;
-  if (e.key === 'Escape') endTour();
-  else if (e.key === 'ArrowRight') tourStep(T.i + 1);
-  else if (e.key === 'ArrowLeft') tourStep(T.i - 1);
-}
+function startTour(){ if (F) return; overlay.innerHTML = ''; T = {i: 0}; hpush({tour: true}); V = {tab: 'today'}; render({top: true}); tourStep(0); }
+function endTour(fromPop){ T = null; tourEl.innerHTML = ''; if (!fromPop) { ignorePop++; goBackSilently(); } V = {tab: 'today'}; render({top: true, focus: true}); }
 function tourStep(i){
-  if (i < 0) return;
-  if (i >= TOUR.length) return endTour();
-  T.i = i;
-  const s = TOUR[i];
-  if (tab !== s.tab || view) { tab = s.tab; view = null; render(); }
-  document.removeEventListener('keydown', tourKey);
-  document.addEventListener('keydown', tourKey);
+  if (i < 0) return; if (i >= TOUR.length) return endTour();
+  T.i = i; const s = TOUR[i];
+  if (V.tab !== s.tab || V.page) { V = {tab: s.tab}; render(); }
   const target = s.sel ? document.querySelector(s.sel) : null;
-  if (target && !target.closest('.tabs, .hdr')) {
-    const r = target.getBoundingClientRect();
-    window.scrollTo({top: Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2), behavior:'instant'});
-  } else window.scrollTo(0, 0);
+  if (target && !target.closest('.tabs, .hdr')) { const r = target.getBoundingClientRect(); window.scrollTo({top: Math.max(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2), behavior: 'instant'}); }
+  else if (!target || target.closest('.hdr')) window.scrollTo(0, 0);
   requestAnimationFrame(() => drawTour(target));
 }
-function holeRect(target){
-  const vh = window.innerHeight, vw = window.innerWidth, pad = 8, r = target.getBoundingClientRect();
-  const top = Math.max(4, r.top - pad), left = Math.max(4, r.left - pad);
-  return {top, left, w: Math.min(vw - 4, r.right + pad) - left, h: Math.min(vh - 4, r.bottom + pad) - top};
-}
+function holeRect(target){ const vh = innerHeight, vw = innerWidth, pad = 8, r = target.getBoundingClientRect();
+  const top = Math.max(4, r.top - pad), left = Math.max(4, r.left - pad); return {top, left, w: Math.min(vw - 4, r.right + pad) - left, h: Math.min(vh - 4, r.bottom + pad) - top}; }
 function placeTour(target){
-  const card = tourEl.querySelector('.tour-card'), holeEl = tourEl.querySelector('.tour-hole');
-  if (!card || !target) return;
-  const vh = window.innerHeight, gap = 12, margin = 10;
-  let hr = holeRect(target);
-  const ch = card.offsetHeight;
-  const fitsBelow = hr.top + hr.h + gap + ch <= vh - margin;
-  const fitsAbove = hr.top - gap - ch >= margin;
-  const fixed = target.closest('.tabs, .hdr');
-  if (!fitsBelow && !fitsAbove && !fixed) {
-    // Bring the target's top up under the header, then try again below it.
-    const hdr = Math.max(0, document.querySelector('.hdr').getBoundingClientRect().bottom);
-    window.scrollTo({top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - hdr - 12), behavior:'instant'});
-    hr = holeRect(target);
-  }
+  const card = tourEl.querySelector('.tour-card'), holeEl = tourEl.querySelector('.tour-hole'); if (!card || !target) return;
+  const vh = innerHeight, gap = 12, margin = 10; let hr = holeRect(target); const ch = card.offsetHeight;
+  if (!(hr.top + hr.h + gap + ch <= vh - margin) && !(hr.top - gap - ch >= margin) && !target.closest('.tabs, .hdr')) {
+    window.scrollTo({top: Math.max(0, target.getBoundingClientRect().top + window.scrollY - 76), behavior: 'instant'}); hr = holeRect(target); }
   Object.assign(holeEl.style, {top: hr.top + 'px', left: hr.left + 'px', width: hr.w + 'px', height: hr.h + 'px'});
-  card.style.bottom = ''; card.style.maxHeight = '';
-  let top;
-  if (hr.top + hr.h + gap + ch <= vh - margin) top = hr.top + hr.h + gap;          // below the target
-  else if (hr.top - gap - ch >= margin) top = hr.top - gap - ch;                    // above the target
-  else {                                                                             // tall target: sit over its lower part
-    const maxH = Math.min(ch, Math.max(260, vh * .6));
-    card.style.maxHeight = maxH + 'px';
-    top = vh - margin - maxH;
-  }
-  card.style.top = Math.max(margin, Math.min(top, vh - margin - Math.min(ch, vh - 2 * margin))) + 'px';
-  card.style.visibility = '';
+  card.style.bottom = ''; card.style.maxHeight = ''; let top;
+  if (hr.top + hr.h + gap + ch <= vh - margin) top = hr.top + hr.h + gap;
+  else if (hr.top - gap - ch >= margin) top = hr.top - gap - ch;
+  else { const maxH = Math.min(ch, Math.max(260, vh * .6)); card.style.maxHeight = maxH + 'px'; top = vh - margin - maxH; }
+  card.style.top = Math.max(margin, Math.min(top, vh - margin - Math.min(ch, vh - 2 * margin))) + 'px'; card.style.visibility = '';
 }
 function drawTour(target){
-  if (!T) return;
-  const s = TOUR[T.i], n = TOUR.length, last = T.i === n - 1;
-  const centered = !target;
-  const hole = target ? '<div class="tour-hole"></div>' : '';
-  tourEl.innerHTML = `<div class="tour-layer${centered ? ' dim' : ''}">${hole}
-    <div class="tour-card${centered ? ' center' : ''}" style="${centered ? '' : 'visibility:hidden;top:0'}" role="dialog" aria-modal="true" aria-labelledby="tour-t" aria-describedby="tour-x">
+  if (!T) return; const s = TOUR[T.i], n = TOUR.length, last = T.i === n - 1, centered = !target;
+  tourEl.innerHTML = `<div class="tour-layer${centered ? ' dim' : ''}">${target ? '<div class="tour-hole"></div>' : ''}
+    <div class="tour-card${centered ? ' center' : ''}" style="${centered ? '' : 'visibility:hidden;top:0'}" role="dialog" aria-modal="true" aria-labelledby="tour-t">
       ${s.pic ? `<div class="tour-pic">${ico(s.pic)}</div>` : ''}
       <div class="tour-dots" aria-label="Step ${T.i + 1} of ${n}">${TOUR.map((_, k) => `<i class="${k === T.i ? 'on' : k < T.i ? 'past' : ''}"></i>`).join('')}</div>
-      <h2 id="tour-t">${s.title}</h2>
-      <div id="tour-x" class="tour-text">${s.text}</div>
-      <div class="tour-foot">
-        <div class="tour-btns">
-          ${T.i > 0 ? `<button class="btn small" data-tour-back>${ico('back')}Back</button>` : `<button class="btn small quiet" data-tour-end>Close</button>`}
-          <button class="btn primary small" data-tour-next id="tour-next">${last ? 'Start using Willow' : 'Next ' + ico('next')}</button>
-        </div>
-        ${T.i > 0 && !last ? `<button class="tour-skip" data-tour-end>Close the tour</button>` : ''}
-      </div>
-    </div></div>`;
-  placeTour(target);
-  const nb = document.getElementById('tour-next'); if (nb) nb.focus({preventScroll:true});
+      <h2 id="tour-t">${s.title}</h2><div class="tour-text">${s.text}</div>
+      <div class="tour-foot"><div class="tour-btns">
+        ${T.i > 0 ? `<button class="btn small" data-tour-back>${ico('back')}Back</button>` : `<button class="btn small" data-tour-end>Close</button>`}
+        <button class="btn primary small" data-tour-next id="tour-next">${last ? 'Start using Willow' : 'Next ' + ico('next')}</button></div>
+        ${T.i > 0 && !last ? `<button class="btn link" data-tour-end>Close the tour</button>` : ''}</div></div></div>`;
+  placeTour(target); const nb = document.getElementById('tour-next'); if (nb) nb.focus({preventScroll: true});
 }
 window.addEventListener('resize', () => { if (T) { const s = TOUR[T.i]; drawTour(s.sel ? document.querySelector(s.sel) : null); } });
 
-// First visit: offer the tour on the welcome card (no auto-start).
+/* ---------- Offline (installed app only) ---------- */
+if (EMBED && 'serviceWorker' in navigator && location.protocol === 'https:') { try { navigator.serviceWorker.register('sw.js'); } catch {} }
 
 applyPrefs();
-render();
+render({top: true});
 })();
 </script>
 
